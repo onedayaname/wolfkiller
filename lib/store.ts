@@ -36,6 +36,7 @@ interface GameStore extends GameState {
   setGameRule: (rule: GameConfig['gameRule']) => void
   startGame: () => boolean
   nextPlayer: () => void
+  setCurrentViewingPlayer: (playerIndex: number) => void
   revealIdentity: () => void
   hideIdentity: () => void
   killPlayer: (playerId: number, cause: DeathCause) => void
@@ -67,12 +68,14 @@ const initialState: GameState = {
   winner: null,
   victoryReason: null,
   showVictoryDialog: false,
+  wolfKillUsed: false,
 }
 
 const initialExtendedState = {
   wolfKilledPlayerId: null as number | null,
   guardedPlayerId: null as number | null,
   hunterSkillPrompt: null as HunterSkillPrompt | null,
+  wolfKillUsed: false,
 }
 
 export const useGameStore = create<GameStore>((set, get) => ({
@@ -145,6 +148,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
       wolfKilledPlayerId: null,
       guardedPlayerId: null,
       hunterSkillPrompt: null,
+      wolfKillUsed: false,
     })
 
     return true
@@ -164,6 +168,13 @@ export const useGameStore = create<GameStore>((set, get) => ({
         identityRevealed: false,
       })
     }
+  },
+
+  setCurrentViewingPlayer: (playerIndex) => {
+    set({
+      currentViewingPlayer: playerIndex,
+      identityRevealed: false,
+    })
   },
 
   revealIdentity: () => {
@@ -201,12 +212,13 @@ export const useGameStore = create<GameStore>((set, get) => ({
     if (player && player.role.id === 'hunter') {
       const skillState = player.skillStates?.find((s) => s.name === '开枪')
       if (skillState?.available) {
-        set({
-          hunterSkillPrompt: {
-            hunterId: player.id,
-            hunterName: player.name,
-          },
-        })
+        set((state) => ({
+          players: state.players.map((p) =>
+            p.id === playerId
+              ? { ...p, hunterShootAvailable: true }
+              : p
+          ),
+        }))
       }
     }
 
@@ -238,9 +250,15 @@ export const useGameStore = create<GameStore>((set, get) => ({
   },
 
   useSkill: (playerId, skillName, targetId) => {
-    const { currentRound, currentPhase, players } = get()
+    const { currentRound, currentPhase, players, wolfKillUsed } = get()
     const player = players.find((p) => p.id === playerId)
     if (!player) return false
+
+    if (player.role.type === 'wolf' && skillName === '刀人') {
+      if (wolfKillUsed) {
+        return false
+      }
+    }
 
     const oneTimeSkills = ONE_TIME_SKILLS[player.role.id] || []
     const isOneTimeSkill = oneTimeSkills.includes(skillName)
@@ -257,7 +275,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
       round: currentRound,
       phase: currentPhase,
       playerId,
-      roleName: player.role.name,
+      roleName: player.role.type === 'wolf' ? '狼人' : player.role.name,
       skillName,
       targetId,
       used: true,
@@ -266,28 +284,54 @@ export const useGameStore = create<GameStore>((set, get) => ({
     set((state) => ({
       skillUsages: [...state.skillUsages, skillUsage],
       players: state.players.map((p) => {
-        if (p.id !== playerId || !p.skillStates) return p
-        return {
-          ...p,
-          skillStates: p.skillStates.map((s) =>
+        if (p.id !== playerId) return p
+        
+        const updatedPlayer = { ...p }
+        
+        if (player.role.id === 'hunter' && skillName === '开枪') {
+          updatedPlayer.hunterShootAvailable = false
+          updatedPlayer.hunterShootUsedRound = currentRound
+        }
+        
+        if (p.skillStates) {
+          updatedPlayer.skillStates = p.skillStates.map((s) =>
             s.name === skillName
               ? { ...s, available: false, usedAt: { round: currentRound, phase: currentPhase } }
               : s
-          ),
+          )
         }
+        
+        return updatedPlayer
       }),
+      wolfKillUsed: player.role.type === 'wolf' && skillName === '刀人' ? true : state.wolfKillUsed,
     }))
 
     return true
   },
 
   nextRound: () => {
-    set((state) => ({
-      currentRound: state.currentRound + 1,
-      currentPhase: 'night',
-      wolfKilledPlayerId: null,
-      guardedPlayerId: null,
-    }))
+    set((state) => {
+      const playersWithUpdatedHunter = state.players.map((player) => {
+        if (player.role.id === 'hunter' && player.status === 'dead' && player.hunterShootAvailable) {
+          return {
+            ...player,
+            hunterShootAvailable: false,
+            hunterShootUsedRound: state.currentRound,
+          }
+        }
+        return player
+      })
+
+      return {
+        ...state,
+        currentRound: state.currentRound + 1,
+        currentPhase: 'night',
+        wolfKilledPlayerId: null,
+        guardedPlayerId: null,
+        wolfKillUsed: false,
+        players: playersWithUpdatedHunter,
+      }
+    })
   },
 
   setPhase: (phase) => {
@@ -385,13 +429,25 @@ export const useGameStore = create<GameStore>((set, get) => ({
   },
 
   isSkillAvailable: (playerId, skillName) => {
-    const { players, currentPhase, currentRound } = get()
+    const { players, currentPhase, currentRound, wolfKillUsed } = get()
     const player = players.find((p) => p.id === playerId)
     if (!player) return false
 
     const skillConfigs = SKILL_CONFIGS[player.role.id]
     const skillConfig = skillConfigs?.find((s) => s.name === skillName)
     if (!skillConfig) return false
+
+    if (player.role.type === 'wolf' && skillName === '刀人') {
+      if (wolfKillUsed) {
+        return false
+      }
+    }
+
+    if (player.role.id === 'hunter' && skillName === '开枪') {
+      if (!player.hunterShootAvailable) {
+        return false
+      }
+    }
 
     if (skillConfig.isOneTime) {
       const skillState = player.skillStates?.find((s) => s.name === skillName)

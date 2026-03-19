@@ -71,7 +71,7 @@ export default function GameConfig() {
                 type="number"
                 value={config.playerCount}
                 onChange={(e) => handlePlayerCountChange(parseInt(e.target.value) || 6)}
-                className="w-20 text-center text-white bg-gray-700 border-gray-600"
+                className="w-20 text-center text-white bg-gray-700 border-gray-600 [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
                 min={6}
                 max={20}
               />

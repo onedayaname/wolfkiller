@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useGameStore } from '@/lib/store'
 import { Player, SKILL_CONFIGS, SkillConfig } from '@/lib/types'
@@ -46,7 +46,7 @@ export default function GamePlay() {
     winner,
     victoryReason,
     wolfKilledPlayerId,
-    hunterSkillPrompt,
+    wolfKillUsed,
     killPlayer,
     revivePlayer,
     useSkill: recordSkillUse,
@@ -54,7 +54,6 @@ export default function GamePlay() {
     setPhase,
     confirmVictory,
     resetGame,
-    dismissHunterPrompt,
     getValidTargets,
     isSkillAvailable,
   } = useGameStore()
@@ -83,22 +82,6 @@ export default function GamePlay() {
         return ''
     }
   }
-
-  useEffect(() => {
-    if (hunterSkillPrompt) {
-      const hunter = players.find((p) => p.id === hunterSkillPrompt.hunterId)
-      if (hunter) {
-        setSelectedPlayer(hunter)
-        const skillConfig = SKILL_CONFIGS.hunter?.[0]
-        if (skillConfig) {
-          setSelectedSkill(skillConfig)
-          const targets = getValidTargets(hunter.id, skillConfig.name)
-          setValidTargets(targets)
-          setShowTargetSelection(true)
-        }
-      }
-    }
-  }, [hunterSkillPrompt, players, getValidTargets])
 
   const handlePlayerClick = (player: Player) => {
     setSelectedPlayer(player)
@@ -147,7 +130,9 @@ export default function GamePlay() {
     
     const success = recordSkillUse(selectedPlayer.id, selectedSkill.name, targetId)
     if (success) {
-      if (selectedSkill.name === '毒人') {
+      if (selectedSkill.name === '刀人') {
+        killPlayer(targetId, 'wolf')
+      } else if (selectedSkill.name === '毒人') {
         killPlayer(targetId, 'witch')
       } else if (selectedSkill.name === '自爆') {
         killPlayer(selectedPlayer.id, 'white-wolf-king')
@@ -159,9 +144,6 @@ export default function GamePlay() {
         } else {
           killPlayer(selectedPlayer.id, 'knight')
         }
-      } else if (hunterSkillPrompt) {
-        killPlayer(targetId, 'hunter')
-        dismissHunterPrompt()
       }
       setShowSkillPanel(false)
       setSelectedPlayer(null)
@@ -170,12 +152,16 @@ export default function GamePlay() {
     }
   }
 
-  const handleSkipHunterSkill = () => {
-    dismissHunterPrompt()
-    setShowSkillPanel(false)
-    setSelectedPlayer(null)
-    setSelectedSkill(null)
-    setShowTargetSelection(false)
+  const handleHunterShoot = () => {
+    if (!selectedPlayer) return
+    
+    const skillConfig = SKILL_CONFIGS.hunter?.[0]
+    if (!skillConfig) return
+    
+    const targets = getValidTargets(selectedPlayer.id, skillConfig.name)
+    setValidTargets(targets)
+    setSelectedSkill(skillConfig)
+    setShowTargetSelection(true)
   }
 
   const getSkillUsedInfo = (player: Player, skillName: string): string | null => {
@@ -335,7 +321,7 @@ export default function GamePlay() {
                       第{usage.round}轮 {usage.phase === 'night' ? '黑夜' : '白天'}
                     </span>
                     <span className="text-white">
-                      {getPlayerName(usage.playerId)} ({usage.roleName})
+                      {usage.roleName === '狼人' ? '狼人' : getPlayerName(usage.playerId)} ({usage.roleName})
                       <span className="text-cyan-400"> {usage.skillName}</span>
                       {usage.targetId && (
                         <span className="text-yellow-400"> → {getPlayerName(usage.targetId)}</span>
@@ -456,6 +442,8 @@ export default function GamePlay() {
                       {SKILL_CONFIGS[selectedPlayer.role.id].map((skillConfig) => {
                         const available = isSkillAvailable(selectedPlayer.id, skillConfig.name)
                         const usedInfo = getSkillUsedInfo(selectedPlayer, skillConfig.name)
+                        const isWolfKill = selectedPlayer.role.type === 'wolf' && skillConfig.name === '刀人'
+                        const isHunterShoot = selectedPlayer.role.id === 'hunter' && skillConfig.name === '开枪'
                         return (
                           <div key={skillConfig.name} className="relative">
                             <Button
@@ -476,10 +464,30 @@ export default function GamePlay() {
                                 {usedInfo}
                               </div>
                             )}
+                            {isWolfKill && wolfKillUsed && (
+                              <div className="text-xs text-red-400 text-center mt-1">
+                                本轮已使用
+                              </div>
+                            )}
+                            {isHunterShoot && !selectedPlayer.hunterShootAvailable && (
+                              <div className="text-xs text-orange-400 text-center mt-1">
+                                {selectedPlayer.hunterShootUsedRound ? `第${selectedPlayer.hunterShootUsedRound}轮已使用` : '本轮已使用'}
+                              </div>
+                            )}
                           </div>
                         )
                       })}
                     </div>
+                  )}
+
+                  {selectedPlayer.role.id === 'hunter' && selectedPlayer.hunterShootAvailable && (
+                    <Button
+                      className="w-full h-12 mt-4 bg-orange-500 hover:bg-orange-600"
+                      onClick={() => handleHunterShoot()}
+                    >
+                      <Target className="h-4 w-4 mr-2" />
+                      <span className="ml-2">开枪</span>
+                    </Button>
                   )}
                 </div>
               ) : (
@@ -490,6 +498,16 @@ export default function GamePlay() {
                 >
                   <Heart className="h-4 w-4 mr-2" />
                   复活玩家
+                </Button>
+              )}
+
+              {selectedPlayer.role.id === 'hunter' && selectedPlayer.hunterShootAvailable && (
+                <Button
+                  className="w-full h-12 mt-4 bg-orange-500 hover:bg-orange-600"
+                  onClick={() => handleHunterShoot()}
+                >
+                  <Target className="h-4 w-4 mr-2" />
+                  <span className="ml-2">开枪</span>
                 </Button>
               )}
 
@@ -555,15 +573,11 @@ export default function GamePlay() {
                 variant="ghost"
                 className="w-full"
                 onClick={() => {
-                  if (hunterSkillPrompt) {
-                    handleSkipHunterSkill()
-                  } else {
-                    setShowTargetSelection(false)
-                    setSelectedSkill(null)
-                  }
+                  setShowTargetSelection(false)
+                  setSelectedSkill(null)
                 }}
               >
-                {hunterSkillPrompt ? '放弃开枪' : '取消'}
+                取消
               </Button>
             </motion.div>
           </motion.div>

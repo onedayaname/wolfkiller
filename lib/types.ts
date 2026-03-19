@@ -43,6 +43,8 @@ export interface Player {
   }
   skillStates?: SkillState[]
   lastGuardedRound?: number
+  hunterShootAvailable?: boolean
+  hunterShootUsedRound?: number
 }
 
 export const SKILL_CONFIGS: Record<string, SkillConfig[]> = {
@@ -200,6 +202,7 @@ export interface GameState {
   winner: Winner
   victoryReason: VictoryReason
   showVictoryDialog: boolean
+  wolfKillUsed: boolean
 }
 
 export const ROLES: Role[] = [
