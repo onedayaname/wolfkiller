@@ -30,6 +30,8 @@ interface VictoryResult {
 interface GameStore extends GameState {
   wolfKilledPlayerId: number | null
   guardedPlayerId: number | null
+  guardBlocked: boolean
+  blockedGuardPlayerId: number | null
   hunterSkillPrompt: HunterSkillPrompt | null
   setPlayerCount: (count: number) => void
   setRoleConfig: (config: Record<string, number>) => void
@@ -44,6 +46,7 @@ interface GameStore extends GameState {
   useSkill: (playerId: number, skillName: string, targetId?: number) => boolean
   nextRound: () => void
   setPhase: (phase: GamePhase) => void
+  setWolfKilledPlayerId: (playerId: number | null) => void
   checkVictory: () => VictoryResult
   confirmVictory: () => void
   resetGame: () => void
@@ -74,6 +77,8 @@ const initialState: GameState = {
 const initialExtendedState = {
   wolfKilledPlayerId: null as number | null,
   guardedPlayerId: null as number | null,
+  guardBlocked: false,
+  blockedGuardPlayerId: null as number | null,
   hunterSkillPrompt: null as HunterSkillPrompt | null,
   wolfKillUsed: false,
 }
@@ -186,8 +191,32 @@ export const useGameStore = create<GameStore>((set, get) => ({
   },
 
   killPlayer: (playerId, cause) => {
-    const { currentRound, currentPhase, players } = get()
+    const { currentRound, currentPhase, players, guardedPlayerId } = get()
     const player = players.find((p) => p.id === playerId)
+    
+    if (cause === 'wolf' && guardedPlayerId === playerId) {
+      const guardUsage = get().skillUsages.find(
+        (usage) => usage.skillName === '守护' && usage.targetId === playerId && usage.round === currentRound
+      )
+      if (guardUsage) {
+        const guardPlayer = players.find((p) => p.id === guardUsage.playerId)
+        set((state) => ({
+          guardBlocked: true,
+          blockedGuardPlayerId: guardUsage.playerId,
+          skillUsages: [...state.skillUsages, {
+            id: `guard-block-${currentRound}-${currentPhase}`,
+            round: currentRound,
+            phase: currentPhase,
+            playerId: guardUsage.playerId,
+            roleName: guardPlayer?.role.name || '守卫',
+            skillName: '守护成功',
+            targetId: playerId,
+            used: true,
+          }],
+        }))
+        return
+      }
+    }
     
     if (cause === 'wolf') {
       set({ wolfKilledPlayerId: playerId })
@@ -301,10 +330,20 @@ export const useGameStore = create<GameStore>((set, get) => ({
           )
         }
         
+        if (player.role.id === 'guard' && skillName === '守护' && targetId) {
+          updatedPlayer.lastGuardedRound = currentRound
+          updatedPlayer.guardUsedThisRound = true
+        }
+        
         return updatedPlayer
       }),
       wolfKillUsed: player.role.type === 'wolf' && skillName === '刀人' ? true : state.wolfKillUsed,
+      guardedPlayerId: player.role.id === 'guard' && skillName === '守护' && targetId ? targetId : state.guardedPlayerId,
     }))
+
+    if (player.role.id === 'hunter' && skillName === '开枪' && targetId) {
+      get().killPlayer(targetId, 'hunter')
+    }
 
     return true
   },
@@ -319,6 +358,12 @@ export const useGameStore = create<GameStore>((set, get) => ({
             hunterShootUsedRound: state.currentRound,
           }
         }
+        if (player.role.id === 'guard') {
+          return {
+            ...player,
+            guardUsedThisRound: false,
+          }
+        }
         return player
       })
 
@@ -328,6 +373,8 @@ export const useGameStore = create<GameStore>((set, get) => ({
         currentPhase: 'night',
         wolfKilledPlayerId: null,
         guardedPlayerId: null,
+        guardBlocked: false,
+        blockedGuardPlayerId: null,
         wolfKillUsed: false,
         players: playersWithUpdatedHunter,
       }
@@ -336,6 +383,10 @@ export const useGameStore = create<GameStore>((set, get) => ({
 
   setPhase: (phase) => {
     set({ currentPhase: phase })
+  },
+
+  setWolfKilledPlayerId: (playerId) => {
+    set({ wolfKilledPlayerId: playerId })
   },
 
   checkVictory: () => {
@@ -449,6 +500,12 @@ export const useGameStore = create<GameStore>((set, get) => ({
       }
     }
 
+    if (player.role.id === 'guard' && skillName === '守护') {
+      if (player.guardUsedThisRound) {
+        return false
+      }
+    }
+
     if (skillConfig.isOneTime) {
       const skillState = player.skillStates?.find((s) => s.name === skillName)
       if (!skillState || !skillState.available) {
@@ -464,13 +521,6 @@ export const useGameStore = create<GameStore>((set, get) => ({
     }
     if (skillConfig.phase === 'on_death' && player.status !== 'dead') {
       return false
-    }
-
-    if (player.role.id === 'guard' && skillName === '守护') {
-      const lastGuardedPlayer = players.find((p) => p.lastGuardedRound === currentRound - 1)
-      if (lastGuardedPlayer) {
-        return true
-      }
     }
 
     return true

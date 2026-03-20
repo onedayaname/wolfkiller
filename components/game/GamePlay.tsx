@@ -47,6 +47,8 @@ export default function GamePlay() {
     victoryReason,
     wolfKilledPlayerId,
     wolfKillUsed,
+    guardBlocked,
+    blockedGuardPlayerId,
     killPlayer,
     revivePlayer,
     useSkill: recordSkillUse,
@@ -56,6 +58,7 @@ export default function GamePlay() {
     resetGame,
     getValidTargets,
     isSkillAvailable,
+    setWolfKilledPlayerId,
   } = useGameStore()
 
   const [selectedPlayer, setSelectedPlayer] = useState<Player | null>(null)
@@ -132,6 +135,9 @@ export default function GamePlay() {
     if (success) {
       if (selectedSkill.name === '刀人') {
         killPlayer(targetId, 'wolf')
+      } else if (selectedSkill.name === '救人') {
+        revivePlayer(targetId)
+        setWolfKilledPlayerId(null)
       } else if (selectedSkill.name === '毒人') {
         killPlayer(targetId, 'witch')
       } else if (selectedSkill.name === '自爆') {
@@ -231,7 +237,25 @@ export default function GamePlay() {
             <CardContent className="pt-4">
               <div className="flex items-center gap-2 text-red-300">
                 <Skull className="h-5 w-5" />
-                <span>本轮被狼人刀杀: <strong>{getPlayerName(wolfKilledPlayerId)}</strong></span>
+                <span>本轮被狼人刀杀：<strong>{getPlayerName(wolfKilledPlayerId)}</strong></span>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
+        {guardBlocked && currentPhase === 'night' && (
+          <Card className="bg-green-900/30 border-green-500/50">
+            <CardContent className="pt-4">
+              <div className="flex items-center gap-2 text-green-300">
+                <Shield className="h-5 w-5" />
+                <span>
+                  狼刀被守护抵消！
+                  {blockedGuardPlayerId && (
+                    <span>
+                      {' '}<strong>{getPlayerName(blockedGuardPlayerId)}</strong> 的守护成功
+                    </span>
+                  )}
+                </span>
               </div>
             </CardContent>
           </Card>
@@ -429,15 +453,14 @@ export default function GamePlay() {
               {selectedPlayer.status === 'alive' ? (
                 <div className="space-y-3">
                   <Button
-                    variant="destructive"
-                    className="w-full h-12"
+                    className="w-full h-12 bg-red-600 hover:bg-red-700"
                     onClick={() => handleKill(selectedPlayer.id)}
                   >
                     <Skull className="h-4 w-4 mr-2" />
                     标记死亡
                   </Button>
 
-                  {SKILL_CONFIGS[selectedPlayer.role.id] && (
+                      {SKILL_CONFIGS[selectedPlayer.role.id] && (
                     <div className="grid grid-cols-2 gap-2 mt-4">
                       {SKILL_CONFIGS[selectedPlayer.role.id].map((skillConfig) => {
                         const available = isSkillAvailable(selectedPlayer.id, skillConfig.name)
@@ -447,7 +470,8 @@ export default function GamePlay() {
                         return (
                           <div key={skillConfig.name} className="relative">
                             <Button
-                              className={`h-12 w-full ${available ? skillConfig.color : 'bg-gray-600'}`}
+                              className="h-12 w-full text-white"
+                              style={{ backgroundColor: available ? skillConfig.color : '#52525b' }}
                               onClick={() => handleSkillClick(skillConfig)}
                               disabled={!available}
                             >
@@ -467,11 +491,6 @@ export default function GamePlay() {
                             {isWolfKill && wolfKillUsed && (
                               <div className="text-xs text-red-400 text-center mt-1">
                                 本轮已使用
-                              </div>
-                            )}
-                            {isHunterShoot && !selectedPlayer.hunterShootAvailable && (
-                              <div className="text-xs text-orange-400 text-center mt-1">
-                                {selectedPlayer.hunterShootUsedRound ? `第${selectedPlayer.hunterShootUsedRound}轮已使用` : '本轮已使用'}
                               </div>
                             )}
                           </div>
