@@ -375,7 +375,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
       const nextRound = nextPhase === 'night' ? state.currentRound + 1 : state.currentRound
       
       const playersWithUpdatedHunter = state.players.map((player) => {
-        if (player.role.id === 'hunter' && player.status === 'dead' && player.hunterShootAvailable) {
+        if (player.role.id === 'hunter' && player.status === 'dead' && player.hunterShootAvailable && nextPhase === 'night') {
           return {
             ...player,
             hunterShootAvailable: false,

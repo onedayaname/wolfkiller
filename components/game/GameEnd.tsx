@@ -43,7 +43,7 @@ export default function GameEnd() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-gray-900 via-purple-900 to-gray-900 p-4">
+    <div className="min-h-screen bg-gradient-to-b from-slate-900 via-purple-950 to-slate-900 p-4">
       <div className="max-w-2xl mx-auto space-y-6">
         <motion.div
           initial={{ opacity: 0, scale: 0.9 }}
@@ -59,12 +59,12 @@ export default function GameEnd() {
           <p className="text-yellow-400 text-lg mb-2">
             {getVictoryReasonText()}
           </p>
-          <p className="text-gray-400 text-lg">
+          <p className="text-indigo-300 text-lg">
             游戏在第 {currentRound} 轮结束
           </p>
         </motion.div>
 
-        <Card className="bg-gray-800/50 border-gray-700">
+        <Card className="bg-indigo-950/80 border-indigo-700/50 shadow-xl">
           <CardHeader>
             <CardTitle className="text-white flex items-center gap-2">
               <Trophy className="h-5 w-5 text-yellow-400" />
@@ -73,35 +73,35 @@ export default function GameEnd() {
           </CardHeader>
           <CardContent>
             <div className="grid grid-cols-2 gap-4">
-              <div className="text-center p-4 bg-gray-700/50 rounded-lg">
+              <div className="text-center p-4 bg-indigo-900/50 rounded-xl">
                 <div className="text-3xl font-bold text-green-400">
                   {alivePlayers.length}
                 </div>
-                <div className="text-gray-400 text-sm">存活玩家</div>
+                <div className="text-indigo-300 text-sm">存活玩家</div>
               </div>
-              <div className="text-center p-4 bg-gray-700/50 rounded-lg">
+              <div className="text-center p-4 bg-indigo-900/50 rounded-xl">
                 <div className="text-3xl font-bold text-red-400">
                   {deadPlayers.length}
                 </div>
-                <div className="text-gray-400 text-sm">死亡玩家</div>
+                <div className="text-indigo-300 text-sm">死亡玩家</div>
               </div>
-              <div className="text-center p-4 bg-gray-700/50 rounded-lg">
+              <div className="text-center p-4 bg-indigo-900/50 rounded-xl">
                 <div className="text-3xl font-bold text-purple-400">
                   {skillUsages.length}
                 </div>
-                <div className="text-gray-400 text-sm">技能使用</div>
+                <div className="text-indigo-300 text-sm">技能使用</div>
               </div>
-              <div className="text-center p-4 bg-gray-700/50 rounded-lg">
+              <div className="text-center p-4 bg-indigo-900/50 rounded-xl">
                 <div className="text-3xl font-bold text-blue-400">
                   {currentRound}
                 </div>
-                <div className="text-gray-400 text-sm">游戏轮次</div>
+                <div className="text-indigo-300 text-sm">游戏轮次</div>
               </div>
             </div>
           </CardContent>
         </Card>
 
-        <Card className="bg-gray-800/50 border-gray-700">
+        <Card className="bg-indigo-950/80 border-indigo-700/50 shadow-xl">
           <CardHeader>
             <CardTitle className="text-white flex items-center gap-2">
               <Heart className="h-5 w-5 text-green-400" />
@@ -113,7 +113,7 @@ export default function GameEnd() {
               {alivePlayers.map((player) => (
                 <div
                   key={player.id}
-                  className="flex items-center justify-between p-3 bg-gray-700/50 rounded-lg"
+                  className="flex items-center justify-between p-3 bg-indigo-900/50 rounded-xl"
                 >
                   <span className="text-white">{player.name}</span>
                   <span className={`text-sm ${getRoleColor(player.role.type)}`}>
@@ -125,7 +125,7 @@ export default function GameEnd() {
           </CardContent>
         </Card>
 
-        <Card className="bg-gray-800/50 border-gray-700">
+        <Card className="bg-indigo-950/80 border-indigo-700/50 shadow-xl">
           <CardHeader>
             <CardTitle className="text-white flex items-center gap-2">
               <Skull className="h-5 w-5 text-red-400" />
@@ -137,7 +137,7 @@ export default function GameEnd() {
               {deadPlayers.map((player) => (
                 <div
                   key={player.id}
-                  className="flex items-center justify-between p-3 bg-gray-700/50 rounded-lg opacity-60"
+                  className="flex items-center justify-between p-3 bg-indigo-900/50 rounded-xl opacity-60"
                 >
                   <span className="text-white line-through">{player.name}</span>
                   <span className={`text-sm ${getRoleColor(player.role.type)}`}>
@@ -152,7 +152,7 @@ export default function GameEnd() {
         <div className="space-y-3">
           <Button
             size="lg"
-            className="w-full h-14"
+            className="w-full h-14 shadow-lg"
             onClick={resetGame}
           >
             <RotateCcw className="h-5 w-5 mr-2" />

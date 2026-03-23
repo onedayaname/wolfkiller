@@ -3,57 +3,77 @@
 @tailwind utilities;
  
 @layer base {
+  /* 浅色模式 - 用于设置、身份分配、白天 */
   :root {
-    --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
+    --background: 210 40% 98%;
+    --foreground: 222 47% 11%;
     --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
+    --card-foreground: 222 47% 11%;
     --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
-    --primary: 222.2 47.4% 11.2%;
+    --popover-foreground: 222 47% 11%;
+    --primary: 222 47% 11%;
     --primary-foreground: 210 40% 98%;
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
-    --destructive: 0 84.2% 60.2%;
+    --secondary: 210 40% 96%;
+    --secondary-foreground: 222 47% 11%;
+    --muted: 210 40% 96%;
+    --muted-foreground: 215 16% 47%;
+    --accent: 210 40% 96%;
+    --accent-foreground: 222 47% 11%;
+    --destructive: 0 84% 60%;
     --destructive-foreground: 210 40% 98%;
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 222.2 84% 4.9%;
+    --border: 214 32% 91%;
+    --input: 214 32% 91%;
+    --ring: 222 84% 5%;
     --radius: 0.5rem;
     --wolf: 0 72% 51%;
     --wolf-foreground: 0 0% 100%;
     --good: 142 76% 36%;
     --good-foreground: 0 0% 100%;
+    --day-bg-start: 210 50% 98%;
+    --day-bg-mid: 200 40% 96%;
+    --day-bg-end: 210 50% 98%;
+    --day-card-bg: 0 0% 100%;
+    --day-card-border: 214 32% 91%;
+    --day-button-bg: 222 47% 11%;
+    --day-button-hover: 222 47% 15%;
+    --day-accent-purple: 250 80% 95%;
+    --day-accent-purple-dark: 250 70% 65%;
   }
  
+  /* 深色模式 - 用于夜晚 */
   .dark {
-    --background: 222.2 84% 4.9%;
+    --background: 222 84% 5%;
     --foreground: 210 40% 98%;
-    --card: 222.2 84% 4.9%;
+    --card: 222 84% 5%;
     --card-foreground: 210 40% 98%;
-    --popover: 222.2 84% 4.9%;
+    --popover: 222 84% 5%;
     --popover-foreground: 210 40% 98%;
     --primary: 210 40% 98%;
-    --primary-foreground: 222.2 47.4% 11.2%;
-    --secondary: 217.2 32.6% 17.5%;
+    --primary-foreground: 222 47% 11%;
+    --secondary: 217 33% 18%;
     --secondary-foreground: 210 40% 98%;
-    --muted: 217.2 32.6% 17.5%;
-    --muted-foreground: 215 20.2% 65.1%;
-    --accent: 217.2 32.6% 17.5%;
+    --muted: 217 33% 18%;
+    --muted-foreground: 215 20% 65%;
+    --accent: 217 33% 18%;
     --accent-foreground: 210 40% 98%;
-    --destructive: 0 62.8% 30.6%;
+    --destructive: 0 63% 31%;
     --destructive-foreground: 210 40% 98%;
-    --border: 217.2 32.6% 17.5%;
-    --input: 217.2 32.6% 17.5%;
-    --ring: 212.7 26.8% 83.9%;
+    --border: 217 33% 18%;
+    --input: 217 33% 18%;
+    --ring: 213 27% 84%;
     --wolf: 0 72% 51%;
     --wolf-foreground: 0 0% 100%;
     --good: 142 76% 36%;
     --good-foreground: 0 0% 100%;
+    --night-bg-start: 222 84% 5%;
+    --night-bg-mid: 250 70% 8%;
+    --night-bg-end: 222 84% 5%;
+    --night-card-bg: 222 84% 8%;
+    --night-card-border: 217 33% 18%;
+    --night-button-bg: 217 33% 18%;
+    --night-button-hover: 217 33% 22%;
+    --night-accent-purple: 250 70% 15%;
+    --night-accent-purple-dark: 250 70% 25%;
   }
 }
  

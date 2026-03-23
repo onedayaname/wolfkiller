@@ -24,10 +24,10 @@ export default function IdentityView() {
 
   if (players.length === 0) {
     return (
-      <div className="min-h-screen bg-gradient-to-b from-gray-900 via-purple-900 to-gray-900 p-4 flex items-center justify-center">
-        <div className="text-white text-center">
+      <div className="min-h-screen bg-gradient-to-b from-sky-100 via-indigo-50 to-purple-100 p-4 flex items-center justify-center">
+        <div className="text-slate-800 text-center">
           <p className="text-xl mb-4">加载中...</p>
-          <p className="text-gray-400 text-sm">正在初始化游戏...</p>
+          <p className="text-slate-500 text-sm">正在初始化游戏...</p>
         </div>
       </div>
     )
@@ -35,10 +35,10 @@ export default function IdentityView() {
 
   if (!currentPlayer) {
     return (
-      <div className="min-h-screen bg-gradient-to-b from-gray-900 via-purple-900 to-gray-900 p-4 flex items-center justify-center">
-        <div className="text-white text-center">
+      <div className="min-h-screen bg-gradient-to-b from-sky-100 via-indigo-50 to-purple-100 p-4 flex items-center justify-center">
+        <div className="text-foreground text-center">
           <p className="text-xl mb-4">错误：找不到当前玩家</p>
-          <p className="text-gray-400 text-sm">玩家总数: {players.length}, 当前索引: {currentViewingPlayer}</p>
+          <p className="text-slate-500 text-sm">玩家总数: {players.length}, 当前索引: {currentViewingPlayer}</p>
         </div>
       </div>
     )
@@ -47,13 +47,13 @@ export default function IdentityView() {
   const getRoleColor = (type: string) => {
     switch (type) {
       case 'wolf':
-        return 'from-red-600 to-red-800'
+        return 'from-red-500 to-red-700'
       case 'god':
-        return 'from-blue-600 to-blue-800'
+        return 'from-blue-500 to-blue-700'
       case 'villager':
-        return 'from-green-600 to-green-800'
+        return 'from-green-500 to-green-700'
       default:
-        return 'from-gray-600 to-gray-800'
+        return 'from-gray-500 to-gray-700'
     }
   }
 
@@ -87,14 +87,14 @@ export default function IdentityView() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-gray-900 via-purple-900 to-gray-900 p-4 flex flex-col">
+    <div className="min-h-screen bg-gradient-to-b from-sky-100 via-indigo-50 to-purple-100 p-4 flex flex-col">
       <div className="text-center mb-4">
-        <p className="text-gray-400 text-sm">
+        <p className="text-slate-500 text-sm">
           点击上方玩家卡片选择查看哪位玩家的身份
         </p>
-        <div className="w-full bg-gray-700 rounded-full h-2 mt-2">
+        <div className="w-full bg-secondary rounded-full h-2 mt-2">
           <motion.div
-            className="bg-purple-500 h-2 rounded-full"
+            className="bg-day-accent-purple-dark h-2 rounded-full"
             initial={{ width: 0 }}
             animate={{ width: `${((currentViewingPlayer + 1) / players.length) * 100}%` }}
           />
@@ -110,22 +110,22 @@ export default function IdentityView() {
                 onClick={() => handlePlayerCardClick(index)}
                 className={`relative aspect-square rounded-md border-2 transition-all cursor-pointer ${
                   currentViewingPlayer === index
-                    ? 'border-purple-500 bg-purple-500/20 shadow-lg shadow-purple-500/30'
-                    : 'border-gray-700 bg-gray-800/50 hover:border-gray-600 hover:bg-gray-800'
+                    ? 'border-indigo-500 bg-indigo-100 shadow-lg shadow-indigo-500/30'
+                    : 'border-slate-200 bg-white/50 hover:border-indigo-300 hover:bg-white'
                 }`}
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
               >
                 <div className="flex flex-col items-center justify-center h-full p-1">
                   <div className="text-lg mb-0.5">👤</div>
-                  <span className="text-[10px] text-white font-medium">
+                  <span className="text-[10px] text-slate-700 font-medium">
                     {player.name.replace('玩家', '')}
                   </span>
                   {currentViewingPlayer === index && (
                     <motion.div
                       initial={{ scale: 0 }}
                       animate={{ scale: 1 }}
-                      className="absolute -top-0.5 -right-0.5 w-3 h-3 bg-purple-500 rounded-full"
+                      className="absolute -top-0.5 -right-0.5 w-3 h-3 bg-indigo-500 rounded-full"
                     />
                   )}
                 </div>
@@ -142,10 +142,10 @@ export default function IdentityView() {
             className="w-full max-w-md"
           >
             <div className="text-center mb-8">
-              <h2 className="text-4xl font-bold text-white mb-2">
+              <h2 className="text-4xl font-bold text-slate-800 mb-2">
                 {currentPlayer.name}
               </h2>
-              <p className="text-gray-400">请查看您的身份</p>
+              <p className="text-slate-500">请查看您的身份</p>
             </div>
 
             <AnimatePresence mode="wait">
@@ -157,12 +157,12 @@ export default function IdentityView() {
                   exit={{ opacity: 0 }}
                   className="relative"
                 >
-                  <div className="bg-gray-800/80 rounded-2xl p-12 text-center border-2 border-gray-700 shadow-2xl">
+                  <div className="bg-white/90 backdrop-blur-sm rounded-2xl p-12 text-center border-2 border-indigo-100 shadow-2xl">
                     <div className="text-6xl mb-4">❓</div>
-                    <p className="text-gray-400 text-lg mb-6">身份已隐藏</p>
+                    <p className="text-slate-500 text-lg mb-6">身份已隐藏</p>
                     <Button
                       size="lg"
-                      className="w-full h-16 text-xl"
+                      className="w-full h-16 text-xl shadow-lg"
                       onClick={revealIdentity}
                     >
                       <Eye className="mr-2 h-6 w-6" />
@@ -213,13 +213,13 @@ export default function IdentityView() {
                     )}
 
                     <div className="mt-8 space-y-3">
-                      <p className="text-center text-gray-400 text-sm">
+                      <p className="text-center text-white/80 text-sm">
                         查看完毕后请隐藏身份，让其他玩家查看
                       </p>
                       <Button
                         variant="secondary"
                         size="lg"
-                        className="w-full h-14"
+                        className="w-full h-14 shadow-lg"
                         onClick={hideIdentity}
                       >
                         <EyeOff className="mr-2 h-5 w-5" />
@@ -237,7 +237,7 @@ export default function IdentityView() {
       <div className="mt-8">
         <Button
           size="lg"
-          className="w-full h-14 text-lg bg-green-600 hover:bg-green-700"
+          className="w-full h-14 text-lg font-bold rounded-xl bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 hover:from-indigo-600 hover:via-purple-600 hover:to-pink-600 text-white shadow-xl hover:shadow-2xl transition-all transform hover:scale-[1.02]"
           onClick={handleStartGameClick}
         >
           <Play className="mr-2 h-5 w-5" />
@@ -263,7 +263,7 @@ export default function IdentityView() {
             </Button>
             <Button
               onClick={confirmStartGame}
-              className="flex-1 bg-green-600 hover:bg-green-700"
+              className="flex-1 font-bold rounded-lg bg-gradient-to-r from-indigo-500 to-purple-500 hover:from-indigo-600 hover:to-purple-600 text-white shadow-md"
             >
               天黑请闭眼
             </Button>
