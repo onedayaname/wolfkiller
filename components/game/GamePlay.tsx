@@ -59,7 +59,33 @@ export default function GamePlay() {
     getValidTargets,
     isSkillAvailable,
     setWolfKilledPlayerId,
-  } = useGameStore()
+    goBack,
+    canGoBack,
+  } = useGameStore((state) => ({
+    players: state.players,
+    currentRound: state.currentRound,
+    currentPhase: state.currentPhase,
+    skillUsages: state.skillUsages,
+    showVictoryDialog: state.showVictoryDialog,
+    winner: state.winner,
+    victoryReason: state.victoryReason,
+    wolfKilledPlayerId: state.wolfKilledPlayerId,
+    wolfKillUsed: state.wolfKillUsed,
+    guardBlocked: state.guardBlocked,
+    blockedGuardPlayerId: state.blockedGuardPlayerId,
+    killPlayer: state.killPlayer,
+    revivePlayer: state.revivePlayer,
+    useSkill: state.useSkill,
+    nextRound: state.nextRound,
+    setPhase: state.setPhase,
+    confirmVictory: state.confirmVictory,
+    resetGame: state.resetGame,
+    getValidTargets: state.getValidTargets,
+    isSkillAvailable: state.isSkillAvailable,
+    setWolfKilledPlayerId: state.setWolfKilledPlayerId,
+    goBack: state.goBack,
+    canGoBack: state.canGoBack,
+  }))
 
   const [selectedPlayer, setSelectedPlayer] = useState<Player | null>(null)
   const [showSkillPanel, setShowSkillPanel] = useState(false)
@@ -180,12 +206,8 @@ export default function GamePlay() {
     return '已使用'
   }
 
-  const handleNextRound = () => {
-    nextRound()
-  }
-
-  const togglePhase = () => {
-    setPhase(currentPhase === 'night' ? 'day' : 'night')
+  const getNextPhaseButtonText = () => {
+    return currentPhase === 'night' ? '天亮请睁眼' : '天黑请闭眼'
   }
 
   const getPhaseText = () => {
@@ -198,6 +220,14 @@ export default function GamePlay() {
     ) : (
       <Sun className="h-5 w-5" />
     )
+  }
+
+  const handleNextRound = () => {
+    nextRound()
+  }
+
+  const handleGoBack = () => {
+    goBack()
   }
 
   const getPlayerRoleColor = (type: string) => {
@@ -227,9 +257,6 @@ export default function GamePlay() {
             {getPhaseIcon()}
             <span className="text-white font-medium">第 {currentRound} 轮 · {getPhaseText()}</span>
           </div>
-          <Button variant="outline" size="sm" onClick={togglePhase}>
-            切换到{currentPhase === 'night' ? '白天' : '黑夜'}
-          </Button>
         </div>
 
         {wolfKilledPlayerId && currentPhase === 'night' && (
@@ -263,9 +290,20 @@ export default function GamePlay() {
 
         <Card className="bg-gray-800/50 border-gray-700">
           <CardHeader>
-            <CardTitle className="text-white flex items-center gap-2">
-              <Heart className="h-5 w-5 text-green-400" />
-              存活玩家 ({alivePlayers.length})
+            <CardTitle className="text-white flex items-center justify-between gap-2">
+              <div className="flex items-center gap-2">
+                <Heart className="h-5 w-5 text-green-400" />
+                存活玩家 ({alivePlayers.length})
+              </div>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={resetGame}
+                className="h-8 text-xs"
+              >
+                <RotateCcw className="h-3 w-3 mr-1" />
+                重新开始
+              </Button>
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -408,16 +446,17 @@ export default function GamePlay() {
             <Button
               variant="outline"
               className="flex-1"
-              onClick={resetGame}
+              onClick={handleGoBack}
+              disabled={!canGoBack}
             >
               <RotateCcw className="h-4 w-4 mr-2" />
-              重新开始
+              返回上一环节
             </Button>
             <Button
               className="flex-1"
               onClick={handleNextRound}
             >
-              下一轮
+              {getNextPhaseButtonText()}
               <ChevronRight className="h-4 w-4 ml-2" />
             </Button>
           </div>
@@ -630,7 +669,9 @@ export default function GamePlay() {
                 <Button
                   variant="ghost"
                   className="w-full"
-                  onClick={() => useGameStore.setState({ showVictoryDialog: false })}
+                  onClick={() => {
+                    useGameStore.setState({ showVictoryDialog: false, dismissedVictory: true })
+                  }}
                 >
                   继续游戏
                 </Button>

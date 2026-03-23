@@ -265,7 +265,7 @@ export default function IdentityView() {
               onClick={confirmStartGame}
               className="flex-1 bg-green-600 hover:bg-green-700"
             >
-              确认开始
+              天黑请闭眼
             </Button>
           </DialogFooter>
         </DialogContent>

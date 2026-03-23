@@ -78,8 +78,20 @@ export interface GameState {
   victoryReason: VictoryReason
   showVictoryDialog: boolean
   wolfKillUsed: boolean
+  dismissedVictory: boolean
+  history: Array<{
+    round: number
+    phase: GamePhase
+    players: Player[]
+    skillUsages: SkillUsage[]
+    wolfKilledPlayerId: number | null
+    guardedPlayerId: number | null
+    guardBlocked: boolean
+    blockedGuardPlayerId: number | null
+    wolfKillUsed: boolean
+    dismissedVictory: boolean
+  }>
 }
-
 export const ROLES: Role[] = [
   { id: 'wolf', name: '狼人', type: 'wolf', description: '每晚可以杀死一名玩家', skillDescription: '每晚可以杀死一名玩家' },
   { id: 'seer', name: '预言家', type: 'god', description: '每晚可以查验一名玩家的身份', skillDescription: '每晚可以查验一名玩家的身份' },

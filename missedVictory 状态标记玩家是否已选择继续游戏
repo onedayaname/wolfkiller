@@ -1,0 +1,143 @@
+[1mdiff --git a/lib/store.ts b/lib/store.ts[m
+[1mindex 3723c74..e5a47ec 100644[m
+[1m--- a/lib/store.ts[m
+[1m+++ b/lib/store.ts[m
+[36m@@ -54,6 +54,8 @@[m [minterface GameStore extends GameState {[m
+   dismissHunterPrompt: () => void[m
+   getValidTargets: (playerId: number, skillName: string) => Player[][m
+   isSkillAvailable: (playerId: number, skillName: string) => boolean[m
+[32m+[m[32m  goBack: () => boolean[m
+[32m+[m[32m  canGoBack: () => boolean[m
+ }[m
+ [m
+ const initialState: GameState = {[m
+[36m@@ -73,6 +75,8 @@[m [mconst initialState: GameState = {[m
+   victoryReason: null,[m
+   showVictoryDialog: false,[m
+   wolfKillUsed: false,[m
+[32m+[m[32m  dismissedVictory: false,[m
+[32m+[m[32m  history: [],[m
+ }[m
+ [m
+ const initialExtendedState = {[m
+[36m@@ -155,6 +159,7 @@[m [mexport const useGameStore = create<GameStore>((set, get) => ({[m
+       guardedPlayerId: null,[m
+       hunterSkillPrompt: null,[m
+       wolfKillUsed: false,[m
+[32m+[m[32m      dismissedVictory: false,[m
+     })[m
+ [m
+     return true[m
+[36m@@ -200,7 +205,7 @@[m [mexport const useGameStore = create<GameStore>((set, get) => ({[m
+   },[m
+ [m
+   killPlayer: (playerId, cause) => {[m
+[31m-    const { currentRound, currentPhase, players, guardedPlayerId } = get()[m
+[32m+[m[32m    const { currentRound, currentPhase, players, guardedPlayerId, dismissedVictory } = get()[m
+     const player = players.find((p) => p.id === playerId)[m
+     [m
+     if (cause === 'wolf' && guardedPlayerId === playerId) {[m
+[36m@@ -249,13 +254,15 @@[m [mexport const useGameStore = create<GameStore>((set, get) => ({[m
+       ),[m
+     }))[m
+ [m
+[31m-    const result = get().checkVictory()[m
+[31m-    if (result.winner) {[m
+[31m-      set({ [m
+[31m-        winner: result.winner, [m
+[31m-        victoryReason: result.reason,[m
+[31m-        showVictoryDialog: true [m
+[31m-      })[m
+[32m+[m[32m    if (!dismissedVictory) {[m
+[32m+[m[32m      const result = get().checkVictory()[m
+[32m+[m[32m      if (result.winner) {[m
+[32m+[m[32m        set({[m[41m [m
+[32m+[m[32m          winner: result.winner,[m[41m [m
+[32m+[m[32m          victoryReason: result.reason,[m
+[32m+[m[32m          showVictoryDialog: true[m[41m [m
+[32m+[m[32m        })[m
+[32m+[m[32m      }[m
+     }[m
+   },[m
+ [m
+[36m@@ -349,7 +356,24 @@[m [mexport const useGameStore = create<GameStore>((set, get) => ({[m
+   },[m
+ [m
+   nextRound: () => {[m
+[32m+[m[32m    const { wolfKilledPlayerId, guardedPlayerId, guardBlocked, blockedGuardPlayerId, wolfKillUsed, dismissedVictory } = get()[m
+     set((state) => {[m
+[32m+[m[32m      const historyEntry = {[m
+[32m+[m[32m        round: state.currentRound,[m
+[32m+[m[32m        phase: state.currentPhase,[m
+[32m+[m[32m        players: JSON.parse(JSON.stringify(state.players)),[m
+[32m+[m[32m        skillUsages: [...state.skillUsages],[m
+[32m+[m[32m        wolfKilledPlayerId,[m
+[32m+[m[32m        guardedPlayerId,[m
+[32m+[m[32m        guardBlocked,[m
+[32m+[m[32m        blockedGuardPlayerId,[m
+[32m+[m[32m        wolfKillUsed,[m
+[32m+[m[32m        dismissedVictory,[m
+[32m+[m[32m      }[m
+[32m+[m[41m      [m
+[32m+[m[32m      const nextPhase = state.currentPhase === 'night' ? 'day' : 'night'[m
+[32m+[m[32m      const nextRound = nextPhase === 'night' ? state.currentRound + 1 : state.currentRound[m
+[32m+[m[41m      [m
+       const playersWithUpdatedHunter = state.players.map((player) => {[m
+         if (player.role.id === 'hunter' && player.status === 'dead' && player.hunterShootAvailable) {[m
+           return {[m
+[36m@@ -369,14 +393,15 @@[m [mexport const useGameStore = create<GameStore>((set, get) => ({[m
+ [m
+       return {[m
+         ...state,[m
+[31m-        currentRound: state.currentRound + 1,[m
+[31m-        currentPhase: 'night',[m
+[32m+[m[32m        currentRound: nextRound,[m
+[32m+[m[32m        currentPhase: nextPhase,[m
+         wolfKilledPlayerId: null,[m
+         guardedPlayerId: null,[m
+         guardBlocked: false,[m
+         blockedGuardPlayerId: null,[m
+         wolfKillUsed: false,[m
+         players: playersWithUpdatedHunter,[m
+[32m+[m[32m        history: [...state.history, historyEntry],[m
+       }[m
+     })[m
+   },[m
+[36m@@ -543,4 +568,37 @@[m [mexport const useGameStore = create<GameStore>((set, get) => ({[m
+       },[m
+     })[m
+   },[m
+[32m+[m
+[32m+[m[32m  goBack: () => {[m
+[32m+[m[32m    const { history, wolfKilledPlayerId, guardedPlayerId, guardBlocked, blockedGuardPlayerId } = get()[m
+[32m+[m[32m    if (history.length === 0) {[m
+[32m+[m[32m      return false[m
+[32m+[m[32m    }[m
+[32m+[m[41m    [m
+[32m+[m[32m    const lastState = history[history.length - 1][m
+[32m+[m[32m    const newHistory = history.slice(0, -1)[m
+[32m+[m[41m    [m
+[32m+[m[32m    set({[m
+[32m+[m[32m      currentRound: lastState.round,[m
+[32m+[m[32m      currentPhase: lastState.phase,[m
+[32m+[m[32m      players: lastState.players,[m
+[32m+[m[32m      skillUsages: lastState.skillUsages,[m
+[32m+[m[32m      wolfKilledPlayerId: lastState.wolfKilledPlayerId,[m
+[32m+[m[32m      guardedPlayerId: lastState.guardedPlayerId,[m
+[32m+[m[32m      guardBlocked: lastState.guardBlocked,[m
+[32m+[m[32m      blockedGuardPlayerId: lastState.blockedGuardPlayerId,[m
+[32m+[m[32m      wolfKillUsed: lastState.wolfKillUsed,[m
+[32m+[m[32m      dismissedVictory: lastState.dismissedVictory,[m
+[32m+[m[32m      history: newHistory,[m
+[32m+[m[32m      winner: null,[m
+[32m+[m[32m      victoryReason: null,[m
+[32m+[m[32m      showVictoryDialog: false,[m
+[32m+[m[32m    })[m
+[32m+[m[41m    [m
+[32m+[m[32m    return true[m
+[32m+[m[32m  },[m
+[32m+[m
+[32m+[m[32m  canGoBack: () => {[m
+[32m+[m[32m    return get().history.length > 0[m
+[32m+[m[32m  },[m
+ }))[m

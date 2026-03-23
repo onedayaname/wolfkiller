@@ -54,6 +54,8 @@ interface GameStore extends GameState {
   dismissHunterPrompt: () => void
   getValidTargets: (playerId: number, skillName: string) => Player[]
   isSkillAvailable: (playerId: number, skillName: string) => boolean
+  goBack: () => boolean
+  canGoBack: () => boolean
 }
 
 const initialState: GameState = {
@@ -73,6 +75,8 @@ const initialState: GameState = {
   victoryReason: null,
   showVictoryDialog: false,
   wolfKillUsed: false,
+  dismissedVictory: false,
+  history: [],
 }
 
 const initialExtendedState = {
@@ -155,6 +159,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
       guardedPlayerId: null,
       hunterSkillPrompt: null,
       wolfKillUsed: false,
+      dismissedVictory: false,
     })
 
     return true
@@ -200,7 +205,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
   },
 
   killPlayer: (playerId, cause) => {
-    const { currentRound, currentPhase, players, guardedPlayerId } = get()
+    const { currentRound, currentPhase, players, guardedPlayerId, dismissedVictory } = get()
     const player = players.find((p) => p.id === playerId)
     
     if (cause === 'wolf' && guardedPlayerId === playerId) {
@@ -249,13 +254,15 @@ export const useGameStore = create<GameStore>((set, get) => ({
       ),
     }))
 
-    const result = get().checkVictory()
-    if (result.winner) {
-      set({ 
-        winner: result.winner, 
-        victoryReason: result.reason,
-        showVictoryDialog: true 
-      })
+    if (!dismissedVictory) {
+      const result = get().checkVictory()
+      if (result.winner) {
+        set({ 
+          winner: result.winner, 
+          victoryReason: result.reason,
+          showVictoryDialog: true 
+        })
+      }
     }
   },
 
@@ -349,7 +356,24 @@ export const useGameStore = create<GameStore>((set, get) => ({
   },
 
   nextRound: () => {
+    const { wolfKilledPlayerId, guardedPlayerId, guardBlocked, blockedGuardPlayerId, wolfKillUsed, dismissedVictory } = get()
     set((state) => {
+      const historyEntry = {
+        round: state.currentRound,
+        phase: state.currentPhase,
+        players: JSON.parse(JSON.stringify(state.players)),
+        skillUsages: [...state.skillUsages],
+        wolfKilledPlayerId,
+        guardedPlayerId,
+        guardBlocked,
+        blockedGuardPlayerId,
+        wolfKillUsed,
+        dismissedVictory,
+      }
+      
+      const nextPhase = state.currentPhase === 'night' ? 'day' : 'night'
+      const nextRound = nextPhase === 'night' ? state.currentRound + 1 : state.currentRound
+      
       const playersWithUpdatedHunter = state.players.map((player) => {
         if (player.role.id === 'hunter' && player.status === 'dead' && player.hunterShootAvailable) {
           return {
@@ -369,14 +393,15 @@ export const useGameStore = create<GameStore>((set, get) => ({
 
       return {
         ...state,
-        currentRound: state.currentRound + 1,
-        currentPhase: 'night',
+        currentRound: nextRound,
+        currentPhase: nextPhase,
         wolfKilledPlayerId: null,
         guardedPlayerId: null,
         guardBlocked: false,
         blockedGuardPlayerId: null,
         wolfKillUsed: false,
         players: playersWithUpdatedHunter,
+        history: [...state.history, historyEntry],
       }
     })
   },
@@ -542,5 +567,38 @@ export const useGameStore = create<GameStore>((set, get) => ({
         gameRule: '屠边',
       },
     })
+  },
+
+  goBack: () => {
+    const { history, wolfKilledPlayerId, guardedPlayerId, guardBlocked, blockedGuardPlayerId } = get()
+    if (history.length === 0) {
+      return false
+    }
+    
+    const lastState = history[history.length - 1]
+    const newHistory = history.slice(0, -1)
+    
+    set({
+      currentRound: lastState.round,
+      currentPhase: lastState.phase,
+      players: lastState.players,
+      skillUsages: lastState.skillUsages,
+      wolfKilledPlayerId: lastState.wolfKilledPlayerId,
+      guardedPlayerId: lastState.guardedPlayerId,
+      guardBlocked: lastState.guardBlocked,
+      blockedGuardPlayerId: lastState.blockedGuardPlayerId,
+      wolfKillUsed: lastState.wolfKillUsed,
+      dismissedVictory: lastState.dismissedVictory,
+      history: newHistory,
+      winner: null,
+      victoryReason: null,
+      showVictoryDialog: false,
+    })
+    
+    return true
+  },
+
+  canGoBack: () => {
+    return get().history.length > 0
   },
 }))
