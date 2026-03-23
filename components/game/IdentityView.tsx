@@ -1,9 +1,11 @@
 'use client'
 
+import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useGameStore } from '@/lib/store'
 import { Button } from '@/components/ui/button'
-import { Eye, EyeOff, ChevronRight } from 'lucide-react'
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog'
+import { Eye, EyeOff, Play } from 'lucide-react'
 
 export default function IdentityView() {
   const {
@@ -14,10 +16,11 @@ export default function IdentityView() {
     hideIdentity,
     nextPlayer,
     setCurrentViewingPlayer,
+    enterGamePlay,
   } = useGameStore()
 
+  const [showStartConfirm, setShowStartConfirm] = useState(false)
   const currentPlayer = players[currentViewingPlayer]
-  const isLastPlayer = currentViewingPlayer === players.length - 1
 
   if (players.length === 0) {
     return (
@@ -67,11 +70,27 @@ export default function IdentityView() {
     }
   }
 
+  const handlePlayerCardClick = (index: number) => {
+    if (identityRevealed) {
+      hideIdentity()
+    }
+    setCurrentViewingPlayer(index)
+  }
+
+  const handleStartGameClick = () => {
+    setShowStartConfirm(true)
+  }
+
+  const confirmStartGame = () => {
+    setShowStartConfirm(false)
+    enterGamePlay()
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-900 via-purple-900 to-gray-900 p-4 flex flex-col">
       <div className="text-center mb-4">
         <p className="text-gray-400 text-sm">
-          身份查看进度：{currentViewingPlayer + 1} / {players.length}
+          点击上方玩家卡片选择查看哪位玩家的身份
         </p>
         <div className="w-full bg-gray-700 rounded-full h-2 mt-2">
           <motion.div
@@ -88,8 +107,8 @@ export default function IdentityView() {
             {players.map((player, index) => (
               <motion.button
                 key={player.id}
-                onClick={() => setCurrentViewingPlayer(index)}
-                className={`relative aspect-square rounded-md border-2 transition-all ${
+                onClick={() => handlePlayerCardClick(index)}
+                className={`relative aspect-square rounded-md border-2 transition-all cursor-pointer ${
                   currentViewingPlayer === index
                     ? 'border-purple-500 bg-purple-500/20 shadow-lg shadow-purple-500/30'
                     : 'border-gray-700 bg-gray-800/50 hover:border-gray-600 hover:bg-gray-800'
@@ -195,7 +214,7 @@ export default function IdentityView() {
 
                     <div className="mt-8 space-y-3">
                       <p className="text-center text-gray-400 text-sm">
-                        请先隐藏身份再让下一位玩家查看
+                        查看完毕后请隐藏身份，让其他玩家查看
                       </p>
                       <Button
                         variant="secondary"
@@ -218,23 +237,39 @@ export default function IdentityView() {
       <div className="mt-8">
         <Button
           size="lg"
-          className="w-full h-14 text-lg"
-          disabled={identityRevealed}
-          onClick={nextPlayer}
+          className="w-full h-14 text-lg bg-green-600 hover:bg-green-700"
+          onClick={handleStartGameClick}
         >
-          {isLastPlayer ? (
-            <>
-              开始游戏
-              <ChevronRight className="ml-2 h-5 w-5" />
-            </>
-          ) : (
-            <>
-              下一位玩家
-              <ChevronRight className="ml-2 h-5 w-5" />
-            </>
-          )}
+          <Play className="mr-2 h-5 w-5" />
+          开始游戏
         </Button>
       </div>
+
+      <Dialog open={showStartConfirm} onOpenChange={setShowStartConfirm}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>确认开始游戏</DialogTitle>
+            <DialogDescription>
+              请确保所有玩家都已经记住自己的身份后，再开始游戏。
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter className="sm:justify-between gap-2">
+            <Button
+              variant="outline"
+              onClick={() => setShowStartConfirm(false)}
+              className="flex-1"
+            >
+              返回查看
+            </Button>
+            <Button
+              onClick={confirmStartGame}
+              className="flex-1 bg-green-600 hover:bg-green-700"
+            >
+              确认开始
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }

@@ -38,6 +38,7 @@ interface GameStore extends GameState {
   setGameRule: (rule: GameConfig['gameRule']) => void
   startGame: () => boolean
   nextPlayer: () => void
+  enterGamePlay: () => void
   setCurrentViewingPlayer: (playerIndex: number) => void
   revealIdentity: () => void
   hideIdentity: () => void
@@ -175,6 +176,14 @@ export const useGameStore = create<GameStore>((set, get) => ({
     }
   },
 
+  enterGamePlay: () => {
+    set({
+      stage: 'playing',
+      currentViewingPlayer: 0,
+      identityRevealed: false,
+    })
+  },
+
   setCurrentViewingPlayer: (playerIndex) => {
     set({
       currentViewingPlayer: playerIndex,
@@ -233,23 +242,12 @@ export const useGameStore = create<GameStore>((set, get) => ({
                 phase: currentPhase,
                 cause,
               },
+              hunterShootAvailable: player.role.id === 'hunter',
+              hunterDeathRound: currentRound,
             }
           : player
       ),
     }))
-
-    if (player && player.role.id === 'hunter') {
-      const skillState = player.skillStates?.find((s) => s.name === '开枪')
-      if (skillState?.available) {
-        set((state) => ({
-          players: state.players.map((p) =>
-            p.id === playerId
-              ? { ...p, hunterShootAvailable: true }
-              : p
-          ),
-        }))
-      }
-    }
 
     const result = get().checkVictory()
     if (result.winner) {
@@ -269,6 +267,8 @@ export const useGameStore = create<GameStore>((set, get) => ({
               ...player,
               status: 'alive',
               deathInfo: undefined,
+              hunterShootAvailable: false,
+              hunterDeathRound: undefined,
             }
           : player
       ),
@@ -496,6 +496,12 @@ export const useGameStore = create<GameStore>((set, get) => ({
 
     if (player.role.id === 'hunter' && skillName === '开枪') {
       if (!player.hunterShootAvailable) {
+        return false
+      }
+      if (player.status !== 'dead') {
+        return false
+      }
+      if (player.hunterDeathRound && player.hunterDeathRound !== currentRound) {
         return false
       }
     }

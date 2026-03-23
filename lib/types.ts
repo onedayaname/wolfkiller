@@ -14,6 +14,7 @@ export interface Player {
   skillStates?: SkillState[]
   hunterShootAvailable?: boolean
   hunterShootUsedRound?: number
+  hunterDeathRound?: number
   lastGuardedRound?: number
   guardUsedThisRound?: boolean
   deathInfo?: {
@@ -115,7 +116,7 @@ export const SKILL_CONFIGS: Record<string, SkillConfig[]> = {
   }],
   witch: [
     {
-      name: '救人',
+      name: '解药',
       needsTarget: true,
       targetFilter: 'wolf_killed',
       phase: 'night',
@@ -124,7 +125,7 @@ export const SKILL_CONFIGS: Record<string, SkillConfig[]> = {
       color: '#22c55e',
     },
     {
-      name: '毒人',
+      name: '毒药',
       needsTarget: true,
       targetFilter: 'alive',
       phase: 'night',
@@ -207,7 +208,7 @@ export const SKILL_CONFIGS: Record<string, SkillConfig[]> = {
 }
 
 export const ONE_TIME_SKILLS: Record<string, string[]> = {
-  witch: ['救人', '毒人'],
+  witch: ['解药', '毒药'],
   hunter: ['开枪'],
   knight: ['决斗'],
   'white-wolf-king': ['自爆'],
@@ -232,12 +233,19 @@ export function validateConfig(roleConfig: Record<string, number>, playerCount: 
   if (totalRoles !== playerCount) {
     return `角色总数 (${totalRoles}) 不等于玩家数量 (${playerCount})`
   }
-  if (!roleConfig.wolf || roleConfig.wolf < 1) {
-    return '至少需要 1 名狼人'
+  
+  const wolfCount = roleConfig.wolf || 0
+  if (wolfCount < 1) {
+    return '狼人阵营至少需要 1 名玩家'
   }
-  if (!roleConfig.seer || !roleConfig.witch || !roleConfig.hunter) {
-    return '需要至少 1 名预言家、1 名女巫和 1 名猎人'
+  
+  const goodCount = Object.entries(roleConfig)
+    .filter(([roleId]) => roleId !== 'wolf')
+    .reduce((sum, [, count]) => sum + count, 0)
+  if (goodCount < 1) {
+    return '好人阵营至少需要 1 名玩家'
   }
+  
   return null
 }
 

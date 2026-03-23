@@ -26,8 +26,8 @@ import {
 const SKILL_ICONS: Record<string, React.ReactNode> = {
   '刀人': <Skull className="h-4 w-4" />,
   '查验': <Eye className="h-4 w-4" />,
-  '救人': <Heart className="h-4 w-4" />,
-  '毒人': <FlaskConical className="h-4 w-4" />,
+  '解药': <Heart className="h-4 w-4" />,
+  '毒药': <FlaskConical className="h-4 w-4" />,
   '开枪': <Target className="h-4 w-4" />,
   '守护': <Shield className="h-4 w-4" />,
   '决斗': <Swords className="h-4 w-4" />,
@@ -135,10 +135,10 @@ export default function GamePlay() {
     if (success) {
       if (selectedSkill.name === '刀人') {
         killPlayer(targetId, 'wolf')
-      } else if (selectedSkill.name === '救人') {
+      } else if (selectedSkill.name === '解药') {
         revivePlayer(targetId)
         setWolfKilledPlayerId(null)
-      } else if (selectedSkill.name === '毒人') {
+      } else if (selectedSkill.name === '毒药') {
         killPlayer(targetId, 'witch')
       } else if (selectedSkill.name === '自爆') {
         killPlayer(selectedPlayer.id, 'white-wolf-king')
@@ -466,7 +466,6 @@ export default function GamePlay() {
                         const available = isSkillAvailable(selectedPlayer.id, skillConfig.name)
                         const usedInfo = getSkillUsedInfo(selectedPlayer, skillConfig.name)
                         const isWolfKill = selectedPlayer.role.type === 'wolf' && skillConfig.name === '刀人'
-                        const isHunterShoot = selectedPlayer.role.id === 'hunter' && skillConfig.name === '开枪'
                         return (
                           <div key={skillConfig.name} className="relative">
                             <Button
@@ -498,36 +497,27 @@ export default function GamePlay() {
                       })}
                     </div>
                   )}
-
+                </div>
+              ) : (
+                <>
                   {selectedPlayer.role.id === 'hunter' && selectedPlayer.hunterShootAvailable && (
                     <Button
-                      className="w-full h-12 mt-4 bg-orange-500 hover:bg-orange-600"
+                      className="w-full h-12 mb-3 bg-orange-500 hover:bg-orange-600"
                       onClick={() => handleHunterShoot()}
                     >
                       <Target className="h-4 w-4 mr-2" />
                       <span className="ml-2">开枪</span>
                     </Button>
                   )}
-                </div>
-              ) : (
-                <Button
-                  variant="secondary"
-                  className="w-full h-12"
-                  onClick={() => handleRevive(selectedPlayer.id)}
-                >
-                  <Heart className="h-4 w-4 mr-2" />
-                  复活玩家
-                </Button>
-              )}
-
-              {selectedPlayer.role.id === 'hunter' && selectedPlayer.hunterShootAvailable && (
-                <Button
-                  className="w-full h-12 mt-4 bg-orange-500 hover:bg-orange-600"
-                  onClick={() => handleHunterShoot()}
-                >
-                  <Target className="h-4 w-4 mr-2" />
-                  <span className="ml-2">开枪</span>
-                </Button>
+                  <Button
+                    variant="secondary"
+                    className="w-full h-12"
+                    onClick={() => handleRevive(selectedPlayer.id)}
+                  >
+                    <Heart className="h-4 w-4 mr-2" />
+                    复活玩家
+                  </Button>
+                </>
               )}
 
               <Button
