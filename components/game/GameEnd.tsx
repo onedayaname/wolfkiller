@@ -43,23 +43,23 @@ export default function GameEnd() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-slate-900 via-purple-950 to-slate-900 p-4">
-      <div className="max-w-2xl mx-auto space-y-6">
+    <div className="min-h-screen bg-gradient-to-b from-slate-900 via-purple-950 to-slate-900 p-4 md:p-6 lg:p-8">
+      <div className="max-w-2xl mx-auto space-y-4 md:space-y-6">
         <motion.div
           initial={{ opacity: 0, scale: 0.9 }}
           animate={{ opacity: 1, scale: 1 }}
           className="text-center"
         >
-          <div className="text-8xl mb-4">
+          <div className="text-6xl md:text-7xl lg:text-8xl mb-3 md:mb-4">
             {winner === 'wolf' ? '🐺' : '👼'}
           </div>
-          <h1 className="text-4xl font-bold text-white mb-2">
+          <h1 className="text-2xl md:text-3xl lg:text-4xl font-bold text-white mb-2">
             {winner === 'wolf' ? '狼人阵营胜利' : '好人阵营胜利'}
           </h1>
-          <p className="text-yellow-400 text-lg mb-2">
+          <p className="text-yellow-400 text-base md:text-lg mb-2">
             {getVictoryReasonText()}
           </p>
-          <p className="text-indigo-300 text-lg">
+          <p className="text-indigo-300 text-base md:text-lg">
             游戏在第 {currentRound} 轮结束
           </p>
         </motion.div>
@@ -72,30 +72,30 @@ export default function GameEnd() {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="grid grid-cols-2 gap-4">
-              <div className="text-center p-4 bg-indigo-900/50 rounded-xl">
-                <div className="text-3xl font-bold text-green-400">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-2 md:gap-4">
+              <div className="text-center p-3 md:p-4 bg-indigo-900/50 rounded-xl">
+                <div className="text-2xl md:text-3xl font-bold text-green-400">
                   {alivePlayers.length}
                 </div>
-                <div className="text-indigo-300 text-sm">存活玩家</div>
+                <div className="text-indigo-300 text-xs md:text-sm">存活玩家</div>
               </div>
-              <div className="text-center p-4 bg-indigo-900/50 rounded-xl">
-                <div className="text-3xl font-bold text-red-400">
+              <div className="text-center p-3 md:p-4 bg-indigo-900/50 rounded-xl">
+                <div className="text-2xl md:text-3xl font-bold text-red-400">
                   {deadPlayers.length}
                 </div>
-                <div className="text-indigo-300 text-sm">死亡玩家</div>
+                <div className="text-indigo-300 text-xs md:text-sm">死亡玩家</div>
               </div>
-              <div className="text-center p-4 bg-indigo-900/50 rounded-xl">
-                <div className="text-3xl font-bold text-purple-400">
+              <div className="text-center p-3 md:p-4 bg-indigo-900/50 rounded-xl">
+                <div className="text-2xl md:text-3xl font-bold text-purple-400">
                   {skillUsages.length}
                 </div>
-                <div className="text-indigo-300 text-sm">技能使用</div>
+                <div className="text-indigo-300 text-xs md:text-sm">技能使用</div>
               </div>
-              <div className="text-center p-4 bg-indigo-900/50 rounded-xl">
-                <div className="text-3xl font-bold text-blue-400">
+              <div className="text-center p-3 md:p-4 bg-indigo-900/50 rounded-xl">
+                <div className="text-2xl md:text-3xl font-bold text-blue-400">
                   {currentRound}
                 </div>
-                <div className="text-indigo-300 text-sm">游戏轮次</div>
+                <div className="text-indigo-300 text-xs md:text-sm">游戏轮次</div>
               </div>
             </div>
           </CardContent>
@@ -109,14 +109,14 @@ export default function GameEnd() {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="grid grid-cols-2 gap-2">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
               {alivePlayers.map((player) => (
                 <div
                   key={player.id}
-                  className="flex items-center justify-between p-3 bg-indigo-900/50 rounded-xl"
+                  className="flex items-center justify-between p-2 md:p-3 bg-indigo-900/50 rounded-xl"
                 >
-                  <span className="text-white">{player.name}</span>
-                  <span className={`text-sm ${getRoleColor(player.role.type)}`}>
+                  <span className="text-white text-sm md:text-base">{player.name}</span>
+                  <span className={`text-xs md:text-sm ${getRoleColor(player.role.type)}`}>
                     {player.role.name}
                   </span>
                 </div>
@@ -133,14 +133,14 @@ export default function GameEnd() {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="grid grid-cols-2 gap-2">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
               {deadPlayers.map((player) => (
                 <div
                   key={player.id}
-                  className="flex items-center justify-between p-3 bg-indigo-900/50 rounded-xl opacity-60"
+                  className="flex items-center justify-between p-2 md:p-3 bg-indigo-900/50 rounded-xl opacity-60"
                 >
-                  <span className="text-white line-through">{player.name}</span>
-                  <span className={`text-sm ${getRoleColor(player.role.type)}`}>
+                  <span className="text-white line-through text-sm md:text-base">{player.name}</span>
+                  <span className={`text-xs md:text-sm ${getRoleColor(player.role.type)}`}>
                     {player.role.name}
                   </span>
                 </div>
@@ -149,10 +149,10 @@ export default function GameEnd() {
           </CardContent>
         </Card>
 
-        <div className="space-y-3">
+        <div className="space-y-2 md:space-y-3">
           <Button
             size="lg"
-            className="w-full h-14 shadow-lg"
+            className="w-full h-12 md:h-14 text-base md:text-lg shadow-lg"
             onClick={resetGame}
           >
             <RotateCcw className="h-5 w-5 mr-2" />
@@ -162,7 +162,7 @@ export default function GameEnd() {
             <Button
               variant="outline"
               size="lg"
-              className="w-full h-14"
+              className="w-full h-12 md:h-14 text-base md:text-lg"
             >
               <Home className="h-5 w-5 mr-2" />
               返回首页

@@ -252,12 +252,12 @@ export default function GamePlay() {
   }
 
   return (
-    <div className={`min-h-screen p-4 pb-20 ${isNight 
+    <div className={`min-h-screen p-3 md:p-4 pb-24 md:pb-20 ${isNight 
       ? 'bg-gradient-to-b from-slate-900 via-indigo-950 to-purple-950' 
       : 'bg-gradient-to-b from-amber-100 via-orange-50 to-pink-100'}`}>
-      <div className="max-w-2xl mx-auto space-y-4">
-        <div className="flex items-center justify-between mb-4">
-          <div className={`flex items-center gap-2 font-medium ${isNight ? 'text-white' : 'text-slate-800'}`}>
+      <div className="max-w-2xl mx-auto space-y-3 md:space-y-4">
+        <div className="flex items-center justify-between mb-3 md:mb-4">
+          <div className={`flex items-center gap-1 md:gap-2 font-medium text-sm md:text-base ${isNight ? 'text-white' : 'text-slate-800'}`}>
             {getPhaseIcon()}
             <span>第 {currentRound} 轮 · {getPhaseText()}</span>
           </div>
@@ -312,7 +312,7 @@ export default function GamePlay() {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="grid grid-cols-3 gap-2">
+            <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-1.5 md:gap-2">
               {alivePlayers.map((player) => (
                 <motion.button
                   key={player.id}
@@ -342,7 +342,7 @@ export default function GamePlay() {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="grid grid-cols-3 gap-2">
+              <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-1.5 md:gap-2">
                 {deadPlayers.map((player) => (
                   <motion.button
                     key={player.id}
@@ -452,7 +452,7 @@ export default function GamePlay() {
           )
         })()}
 
-        <div className={`fixed bottom-0 left-0 right-0 p-4 backdrop-blur-md border-t ${
+        <div className={`fixed bottom-0 left-0 right-0 p-3 md:p-4 backdrop-blur-md border-t ${
           isNight 
             ? 'bg-indigo-950/90 border-indigo-700/50' 
             : 'bg-white/90 border-amber-200/50'
@@ -460,23 +460,25 @@ export default function GamePlay() {
           <div className="max-w-2xl mx-auto flex gap-2">
             <Button
               variant="outline"
-              className={`flex-1 rounded-xl ${isNight ? 'border-indigo-400 text-indigo-300 hover:bg-indigo-900/30' : 'border-orange-400 text-orange-600 hover:bg-orange-50'}`}
+              className={`flex-1 rounded-xl h-10 md:h-12 text-sm md:text-base ${isNight ? 'border-indigo-400 text-indigo-300 hover:bg-indigo-900/30' : 'border-orange-400 text-orange-600 hover:bg-orange-50'}`}
               onClick={handleGoBack}
               disabled={!canGoBack}
             >
-              <RotateCcw className="h-4 w-4 mr-2" />
-              返回上一环节
+              <RotateCcw className="h-4 w-4 mr-1 md:mr-2" />
+              <span className="hidden sm:inline">返回上一环节</span>
+              <span className="sm:hidden">返回</span>
             </Button>
             <Button
-              className={`flex-1 font-bold rounded-xl shadow-lg transition-all transform hover:scale-[1.02] ${
+              className={`flex-1 font-bold rounded-xl shadow-lg transition-all transform hover:scale-[1.02] h-10 md:h-12 text-sm md:text-base ${
                 isNight 
                   ? 'bg-gradient-to-r from-indigo-500 to-purple-500 hover:from-indigo-600 hover:to-purple-600 text-white'
                   : 'bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white'
               }`}
               onClick={handleNextRound}
             >
-              {getNextPhaseButtonText()}
-              <ChevronRight className="h-4 w-4 ml-2" />
+              <span className="hidden sm:inline">{getNextPhaseButtonText()}</span>
+              <span className="sm:hidden">{getNextPhaseButtonText().replace('天黑请闭眼', '天黑').replace('天亮请睁眼', '天亮')}</span>
+              <ChevronRight className="h-4 w-4 ml-1 md:ml-2" />
             </Button>
           </div>
         </div>

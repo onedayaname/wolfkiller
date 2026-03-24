@@ -24,7 +24,7 @@ export default function IdentityView() {
 
   if (players.length === 0) {
     return (
-      <div className="min-h-screen bg-gradient-to-b from-sky-100 via-indigo-50 to-purple-100 p-4 flex items-center justify-center">
+      <div className="min-h-screen bg-gradient-to-b from-sky-100 via-indigo-50 to-purple-100 p-4 md:p-6 lg:p-8 flex items-center justify-center">
         <div className="text-slate-800 text-center">
           <p className="text-xl mb-4">加载中...</p>
           <p className="text-slate-500 text-sm">正在初始化游戏...</p>
@@ -87,12 +87,12 @@ export default function IdentityView() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-sky-100 via-indigo-50 to-purple-100 p-4 flex flex-col">
-      <div className="text-center mb-4">
-        <p className="text-slate-500 text-sm">
+    <div className="min-h-screen bg-gradient-to-b from-sky-100 via-indigo-50 to-purple-100 p-4 md:p-6 lg:p-8 flex flex-col">
+      <div className="text-center mb-3 md:mb-4">
+        <p className="text-slate-500 text-xs md:text-sm">
           点击上方玩家卡片选择查看哪位玩家的身份
         </p>
-        <div className="w-full bg-secondary rounded-full h-2 mt-2">
+        <div className="w-full bg-indigo-200 rounded-full h-1.5 md:h-2 mt-2">
           <motion.div
             className="bg-day-accent-purple-dark h-2 rounded-full"
             initial={{ width: 0 }}
@@ -141,11 +141,11 @@ export default function IdentityView() {
             animate={{ opacity: 1, scale: 1 }}
             className="w-full max-w-md"
           >
-            <div className="text-center mb-8">
-              <h2 className="text-4xl font-bold text-slate-800 mb-2">
+            <div className="text-center mb-6 md:mb-8">
+              <h2 className="text-3xl md:text-4xl font-bold text-slate-800 mb-2">
                 {currentPlayer.name}
               </h2>
-              <p className="text-slate-500">请查看您的身份</p>
+              <p className="text-slate-500 text-sm md:text-base">请查看您的身份</p>
             </div>
 
             <AnimatePresence mode="wait">
@@ -157,15 +157,15 @@ export default function IdentityView() {
                   exit={{ opacity: 0 }}
                   className="relative"
                 >
-                  <div className="bg-white/90 backdrop-blur-sm rounded-2xl p-12 text-center border-2 border-indigo-100 shadow-2xl">
-                    <div className="text-6xl mb-4">❓</div>
-                    <p className="text-slate-500 text-lg mb-6">身份已隐藏</p>
+                  <div className="bg-white/90 backdrop-blur-sm rounded-2xl p-6 md:p-12 text-center border-2 border-indigo-100 shadow-2xl">
+                    <div className="text-4xl md:text-6xl mb-3 md:mb-4">❓</div>
+                    <p className="text-slate-500 text-base md:text-lg mb-4 md:mb-6">身份已隐藏</p>
                     <Button
                       size="lg"
-                      className="w-full h-16 text-xl shadow-lg"
+                      className="w-full h-12 md:h-16 text-base md:text-xl shadow-lg"
                       onClick={revealIdentity}
                     >
-                      <Eye className="mr-2 h-6 w-6" />
+                      <Eye className="mr-2 h-5 w-5 md:h-6 md:w-6" />
                       查看身份
                     </Button>
                   </div>
@@ -234,10 +234,10 @@ export default function IdentityView() {
         </div>
       </div>
 
-      <div className="mt-8">
+      <div className="mt-6 md:mt-8">
         <Button
           size="lg"
-          className="w-full h-14 text-lg font-bold rounded-xl bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 hover:from-indigo-600 hover:via-purple-600 hover:to-pink-600 text-white shadow-xl hover:shadow-2xl transition-all transform hover:scale-[1.02]"
+          className="w-full h-12 md:h-14 text-base md:text-lg font-bold rounded-xl bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 hover:from-indigo-600 hover:via-purple-600 hover:to-pink-600 text-white shadow-xl hover:shadow-2xl transition-all transform hover:scale-[1.02]"
           onClick={handleStartGameClick}
         >
           <Play className="mr-2 h-5 w-5" />
