@@ -102,13 +102,13 @@ export default function IdentityView() {
       </div>
 
       <div className="flex-1 flex flex-col">
-        <div className="mb-4">
-          <div className="grid grid-cols-5 sm:grid-cols-6 md:grid-cols-8 gap-1.5">
+        <div className="mb-3">
+          <div className="flex flex-wrap justify-center gap-1 sm:gap-2">
             {players.map((player, index) => (
               <motion.button
                 key={player.id}
                 onClick={() => handlePlayerCardClick(index)}
-                className={`relative aspect-square rounded-md border-2 transition-all cursor-pointer ${
+                className={`relative w-10 h-10 sm:w-12 sm:h-12 md:w-14 md:h-14 rounded-full border-2 transition-all cursor-pointer ${
                   currentViewingPlayer === index
                     ? 'border-indigo-500 bg-indigo-100 shadow-lg shadow-indigo-500/30'
                     : 'border-slate-200 bg-white/50 hover:border-indigo-300 hover:bg-white'
@@ -116,18 +116,10 @@ export default function IdentityView() {
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
               >
-                <div className="flex flex-col items-center justify-center h-full p-1">
-                  <div className="text-lg mb-0.5">👤</div>
-                  <span className="text-[10px] text-slate-700 font-medium">
+                <div className="flex flex-col items-center justify-center h-full">
+                  <span className="text-xs sm:text-sm font-medium text-slate-700">
                     {player.name.replace('玩家', '')}
                   </span>
-                  {currentViewingPlayer === index && (
-                    <motion.div
-                      initial={{ scale: 0 }}
-                      animate={{ scale: 1 }}
-                      className="absolute -top-0.5 -right-0.5 w-3 h-3 bg-indigo-500 rounded-full"
-                    />
-                  )}
                 </div>
               </motion.button>
             ))}

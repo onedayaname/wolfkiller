@@ -94,17 +94,17 @@ export interface GameState {
 }
 export const ROLES: Role[] = [
   { id: 'wolf', name: '狼人', type: 'wolf', description: '每晚可以杀死一名玩家', skillDescription: '每晚可以杀死一名玩家' },
-  { id: 'seer', name: '预言家', type: 'god', description: '每晚可以查验一名玩家的身份', skillDescription: '每晚可以查验一名玩家的身份' },
-  { id: 'witch', name: '女巫', type: 'god', description: '拥有一瓶解药和一瓶毒药', skillDescription: '拥有一瓶解药和一瓶毒药，解药可以救活被狼人杀死的玩家，毒药可以毒死一名玩家' },
-  { id: 'hunter', name: '猎人', type: 'god', description: '死亡时可以开枪带走一名玩家', skillDescription: '死亡时可以开枪带走一名玩家' },
-  { id: 'guard', name: '守卫', type: 'god', description: '每晚可以守护一名玩家', skillDescription: '每晚可以守护一名玩家，不能连续守护同一人' },
-  { id: 'villager', name: '村民', type: 'villager', description: '没有特殊技能', skillDescription: '' },
-  { id: 'idiot', name: '白痴', type: 'god', description: '被投票出局时可以翻牌免死', skillDescription: '被投票出局时可以翻牌免死，但失去投票权' },
-  { id: 'knight', name: '骑士', type: 'god', description: '白天可以决斗一名玩家', skillDescription: '白天可以决斗一名玩家，若对方是狼人则对方死亡，否则自己死亡' },
   { id: 'white-wolf-king', name: '白狼王', type: 'wolf', description: '可以在白天自爆并带走一名玩家', skillDescription: '可以在白天自爆并带走一名玩家' },
   { id: 'gargoyle', name: '石像鬼', type: 'wolf', description: '每晚可以查验一名玩家的具体身份', skillDescription: '每晚可以查验一名玩家的具体身份' },
   { id: 'demon', name: '恶魔', type: 'wolf', description: '被标记的玩家死亡时可以额外带走一人', skillDescription: '每晚可以标记一名玩家，被标记的玩家死亡时可以额外带走一人' },
   { id: 'wolf-beauty', name: '狼美人', type: 'wolf', description: '被魅惑的玩家会跟随自己一起死亡', skillDescription: '每晚可以魅惑一名玩家，被魅惑的玩家会跟随自己一起死亡' },
+  { id: 'villager', name: '村民', type: 'villager', description: '没有特殊技能', skillDescription: '' },
+  { id: 'seer', name: '预言家', type: 'god', description: '每晚可以查验一名玩家的身份', skillDescription: '每晚可以查验一名玩家的身份' },
+  { id: 'witch', name: '女巫', type: 'god', description: '拥有一瓶解药和一瓶毒药', skillDescription: '拥有一瓶解药和一瓶毒药，解药可以救活被狼人杀死的玩家，毒药可以毒死一名玩家' },
+  { id: 'hunter', name: '猎人', type: 'god', description: '死亡时可以开枪带走一名玩家', skillDescription: '死亡时可以开枪带走一名玩家' },
+  { id: 'guard', name: '守卫', type: 'god', description: '每晚可以守护一名玩家', skillDescription: '每晚可以守护一名玩家，不能连续守护同一人' },
+  { id: 'idiot', name: '白痴', type: 'god', description: '被投票出局时可以翻牌免死', skillDescription: '被投票出局时可以翻牌免死，但失去投票权' },
+  { id: 'knight', name: '骑士', type: 'god', description: '白天可以决斗一名玩家', skillDescription: '白天可以决斗一名玩家，若对方是狼人则对方死亡，否则自己死亡' },
 ]
 
 export const SKILL_CONFIGS: Record<string, SkillConfig[]> = {
