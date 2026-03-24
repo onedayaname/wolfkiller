@@ -300,7 +300,6 @@ export default function GamePlay() {
                 存活玩家 ({alivePlayers.length})
               </div>
               <Button
-                variant="ghost"
                 size="sm"
                 variant="outline"
                 onClick={resetGame}

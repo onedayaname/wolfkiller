@@ -14,7 +14,6 @@ export default function IdentityView() {
     identityRevealed,
     revealIdentity,
     hideIdentity,
-    nextPlayer,
     setCurrentViewingPlayer,
     enterGamePlay,
   } = useGameStore()

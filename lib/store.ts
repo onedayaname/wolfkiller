@@ -206,7 +206,6 @@ export const useGameStore = create<GameStore>((set, get) => ({
 
   killPlayer: (playerId, cause) => {
     const { currentRound, currentPhase, players, guardedPlayerId, dismissedVictory } = get()
-    const player = players.find((p) => p.id === playerId)
     
     if (cause === 'wolf' && guardedPlayerId === playerId) {
       const guardUsage = get().skillUsages.find(
@@ -570,7 +569,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
   },
 
   goBack: () => {
-    const { history, wolfKilledPlayerId, guardedPlayerId, guardBlocked, blockedGuardPlayerId } = get()
+    const { history } = get()
     if (history.length === 0) {
       return false
     }
