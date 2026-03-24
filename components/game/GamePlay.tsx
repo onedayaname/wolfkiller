@@ -53,7 +53,6 @@ export default function GamePlay() {
     revivePlayer,
     useSkill: recordSkillUse,
     nextRound,
-    setPhase,
     confirmVictory,
     resetGame,
     getValidTargets,
