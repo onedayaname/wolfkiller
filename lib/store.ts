@@ -469,7 +469,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
   },
 
   getValidTargets: (playerId, skillName) => {
-    const { players, wolfKilledPlayerId, currentRound } = get()
+    const { players, wolfKilledPlayerId } = get()
     const player = players.find((p) => p.id === playerId)
     if (!player) return []
 
