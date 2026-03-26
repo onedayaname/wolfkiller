@@ -490,24 +490,22 @@ export default function GamePlay() {
           <div className="max-w-2xl mx-auto flex gap-2">
             <Button
               variant="outline"
-              className={`flex-1 rounded-xl h-10 md:h-12 text-sm md:text-base ${isNight ? 'border-indigo-400 text-indigo-300 hover:bg-indigo-900/30' : 'border-orange-400 text-orange-600 hover:bg-orange-50'}`}
+              className={`flex-1 rounded-xl h-10 md:h-12 ${isNight ? 'border-indigo-400 text-indigo-300 hover:bg-indigo-900/30' : 'border-orange-400 text-orange-600 hover:bg-orange-50'}`}
               onClick={handleGoBack}
               disabled={!canGoBack}
             >
               <RotateCcw className="h-4 w-4 mr-1 md:mr-2" />
-              <span className="hidden sm:inline">返回上一环节</span>
-              <span className="sm:hidden">返回</span>
+              <span className="text-xs sm:text-sm md:text-base">返回</span>
             </Button>
             <Button
-              className={`flex-1 font-bold rounded-xl shadow-lg transition-all transform hover:scale-[1.02] h-10 md:h-12 text-sm md:text-base ${
+              className={`flex-1 font-bold rounded-xl shadow-lg transition-all transform hover:scale-[1.02] h-10 md:h-12 ${
                 isNight 
                   ? 'bg-gradient-to-r from-indigo-500 to-purple-500 hover:from-indigo-600 hover:to-purple-600 text-white'
                   : 'bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white'
               }`}
               onClick={handleNextRound}
             >
-              <span className="hidden sm:inline">{getNextPhaseButtonText()}</span>
-              <span className="sm:hidden">{getNextPhaseButtonText().replace('天黑请闭眼', '天黑').replace('天亮请睁眼', '天亮')}</span>
+              <span className="text-xs sm:text-sm md:text-base">{getNextPhaseButtonText()}</span>
               <ChevronRight className="h-4 w-4 ml-1 md:ml-2" />
             </Button>
           </div>
