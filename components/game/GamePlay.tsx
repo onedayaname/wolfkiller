@@ -57,6 +57,7 @@ export default function GamePlay() {
     resetGame,
     getValidTargets,
     isSkillAvailable,
+    isConsecutiveGuard,
     setWolfKilledPlayerId,
     goBack,
     canGoBack,
@@ -81,6 +82,7 @@ export default function GamePlay() {
     resetGame: state.resetGame,
     getValidTargets: state.getValidTargets,
     isSkillAvailable: state.isSkillAvailable,
+    isConsecutiveGuard: state.isConsecutiveGuard,
     setWolfKilledPlayerId: state.setWolfKilledPlayerId,
     goBack: state.goBack,
     canGoBack: state.canGoBack,
@@ -91,6 +93,8 @@ export default function GamePlay() {
   const [selectedSkill, setSelectedSkill] = useState<SkillConfig | null>(null)
   const [showTargetSelection, setShowTargetSelection] = useState(false)
   const [validTargets, setValidTargets] = useState<Player[]>([])
+  const [showConsecutiveGuardConfirm, setShowConsecutiveGuardConfirm] = useState(false)
+  const [pendingGuardTarget, setPendingGuardTarget] = useState<number | null>(null)
 
   const alivePlayers = players.filter((p) => p.status === 'alive')
   const deadPlayers = players.filter((p) => p.status === 'dead')
@@ -155,6 +159,15 @@ export default function GamePlay() {
 
   const handleTargetSelect = (targetId: number) => {
     if (!selectedPlayer || !selectedSkill) return
+
+    if (selectedSkill.name === '守护' && selectedPlayer.role.id === 'guard') {
+      if (isConsecutiveGuard(selectedPlayer.id, targetId)) {
+        setPendingGuardTarget(targetId)
+        setShowConsecutiveGuardConfirm(true)
+        setShowTargetSelection(false)
+        return
+      }
+    }
     
     const success = recordSkillUse(selectedPlayer.id, selectedSkill.name, targetId)
     if (success) {
@@ -192,6 +205,25 @@ export default function GamePlay() {
     const targets = getValidTargets(selectedPlayer.id, skillConfig.name)
     setValidTargets(targets)
     setSelectedSkill(skillConfig)
+    setShowTargetSelection(true)
+  }
+
+  const handleConsecutiveGuardConfirm = () => {
+    if (!selectedPlayer || pendingGuardTarget === null) return
+    
+    const success = recordSkillUse(selectedPlayer.id, '守护', pendingGuardTarget)
+    if (success) {
+      setShowSkillPanel(false)
+      setSelectedPlayer(null)
+      setSelectedSkill(null)
+    }
+    setShowConsecutiveGuardConfirm(false)
+    setPendingGuardTarget(null)
+  }
+
+  const handleConsecutiveGuardCancel = () => {
+    setShowConsecutiveGuardConfirm(false)
+    setPendingGuardTarget(null)
     setShowTargetSelection(true)
   }
 
@@ -646,6 +678,53 @@ export default function GamePlay() {
               >
                 取消
               </Button>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      <AnimatePresence>
+        {showConsecutiveGuardConfirm && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black/80 backdrop-blur z-50 flex items-center justify-center p-4"
+            onClick={handleConsecutiveGuardCancel}
+          >
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+              className={`w-full max-w-md rounded-2xl p-6 text-center ${isNight ? 'bg-indigo-900' : 'bg-white'} shadow-2xl`}
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="text-5xl mb-4">⚠️</div>
+              <h3 className={`text-xl font-bold mb-3 ${isNight ? 'text-white' : 'text-slate-800'}`}>
+                连续守护确认
+              </h3>
+              <p className={`mb-6 ${isNight ? 'text-indigo-300' : 'text-slate-600'}`}>
+                你选择了连续两晚守护同一个玩家，是否确认？
+                <br />
+                <span className="text-yellow-400 text-sm">
+                  （连续守护可能导致守尸，狼人可以从守卫刀不到的地方刀人）
+                </span>
+              </p>
+              <div className="space-y-3">
+                <Button
+                  className="w-full bg-cyan-500 hover:bg-cyan-600"
+                  onClick={handleConsecutiveGuardConfirm}
+                >
+                  确认守护
+                </Button>
+                <Button
+                  variant="outline"
+                  className="w-full"
+                  onClick={handleConsecutiveGuardCancel}
+                >
+                  取消，重新选择
+                </Button>
+              </div>
             </motion.div>
           </motion.div>
         )}

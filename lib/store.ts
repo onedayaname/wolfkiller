@@ -54,6 +54,7 @@ interface GameStore extends GameState {
   dismissHunterPrompt: () => void
   getValidTargets: (playerId: number, skillName: string) => Player[]
   isSkillAvailable: (playerId: number, skillName: string) => boolean
+  isConsecutiveGuard: (playerId: number, targetId: number) => boolean
   goBack: () => boolean
   canGoBack: () => boolean
 }
@@ -319,11 +320,11 @@ export const useGameStore = create<GameStore>((set, get) => ({
     set((state) => ({
       skillUsages: [...state.skillUsages, skillUsage],
       players: state.players.map((p) => {
-        if (p.id !== playerId) return p
+        if (p.id !== playerId && p.id !== targetId) return p
         
         const updatedPlayer = { ...p }
         
-        if (player.role.id === 'hunter' && skillName === '开枪') {
+        if (player.role.id === 'hunter' && skillName === '开枪' && p.id === playerId) {
           updatedPlayer.hunterShootAvailable = false
           updatedPlayer.hunterShootUsedRound = currentRound
         }
@@ -337,8 +338,12 @@ export const useGameStore = create<GameStore>((set, get) => ({
         }
         
         if (player.role.id === 'guard' && skillName === '守护' && targetId) {
-          updatedPlayer.lastGuardedRound = currentRound
-          updatedPlayer.guardUsedThisRound = true
+          if (p.id === playerId) {
+            updatedPlayer.guardUsedThisRound = true
+          }
+          if (p.id === targetId) {
+            updatedPlayer.lastGuardedRound = currentRound
+          }
         }
         
         return updatedPlayer
@@ -493,14 +498,16 @@ export const useGameStore = create<GameStore>((set, get) => ({
         validTargets = players.filter((p) => p.status === 'alive' && p.id !== playerId)
     }
 
-    if (player.role.id === 'guard' && skillName === '守护') {
-      const lastGuardedId = players.find((p) => p.lastGuardedRound === currentRound - 1)?.id
-      if (lastGuardedId) {
-        validTargets = validTargets.filter((p) => p.id !== lastGuardedId)
-      }
-    }
-
     return validTargets
+  },
+
+  isConsecutiveGuard: function(playerId: number, targetId: number): boolean {
+    const { players, currentRound } = get()
+    const player = players.find((p) => p.id === playerId)
+    if (!player || player.role.id !== 'guard') return false
+    const target = players.find((p) => p.id === targetId)
+    if (!target) return false
+    return target.lastGuardedRound === currentRound - 1 && target.lastGuardedRound !== undefined
   },
 
   isSkillAvailable: (playerId, skillName) => {
