@@ -7,7 +7,6 @@ import {
   SkillState,
   Winner,
   VictoryReason,
-  GamePhase,
   getRecommendedConfig,
   validateConfig,
   assignRoles,
@@ -46,7 +45,6 @@ interface GameStore extends GameState {
   revivePlayer: (playerId: number) => void
   useSkill: (playerId: number, skillName: string, targetId?: number) => boolean
   nextRound: () => void
-  setPhase: (phase: GamePhase) => void
   setWolfKilledPlayerId: (playerId: number | null) => void
   checkVictory: () => VictoryResult
   confirmVictory: () => void
@@ -86,7 +84,6 @@ const initialExtendedState = {
   guardBlocked: false,
   blockedGuardPlayerId: null as number | null,
   hunterSkillPrompt: null as HunterSkillPrompt | null,
-  wolfKillUsed: false,
 }
 
 export const useGameStore = create<GameStore>((set, get) => ({
@@ -408,10 +405,6 @@ export const useGameStore = create<GameStore>((set, get) => ({
         history: [...state.history, historyEntry],
       }
     })
-  },
-
-  setPhase: (phase) => {
-    set({ currentPhase: phase })
   },
 
   setWolfKilledPlayerId: (playerId) => {

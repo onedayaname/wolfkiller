@@ -77,7 +77,6 @@ export default function GamePlay() {
     revivePlayer: state.revivePlayer,
     useSkill: state.useSkill,
     nextRound: state.nextRound,
-    setPhase: state.setPhase,
     confirmVictory: state.confirmVictory,
     resetGame: state.resetGame,
     getValidTargets: state.getValidTargets,
@@ -254,14 +253,6 @@ export default function GamePlay() {
   }
 
   const isNight = currentPhase === 'night'
-
-  const handleNextRound = () => {
-    nextRound()
-  }
-
-  const handleGoBack = () => {
-    goBack()
-  }
 
   const getPlayerRoleColor = (type: string) => {
     switch (type) {
@@ -491,7 +482,7 @@ export default function GamePlay() {
             <Button
               variant="outline"
               className={`flex-1 rounded-xl h-10 md:h-12 ${isNight ? 'border-indigo-400 text-indigo-300 hover:bg-indigo-900/30' : 'border-orange-400 text-orange-600 hover:bg-orange-50'}`}
-              onClick={handleGoBack}
+              onClick={goBack}
               disabled={!canGoBack}
             >
               <RotateCcw className="h-4 w-4 mr-1 md:mr-2" />
@@ -503,7 +494,7 @@ export default function GamePlay() {
                   ? 'bg-gradient-to-r from-indigo-500 to-purple-500 hover:from-indigo-600 hover:to-purple-600 text-white'
                   : 'bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white'
               }`}
-              onClick={handleNextRound}
+              onClick={nextRound}
             >
               <span className="text-xs sm:text-sm md:text-base">{getNextPhaseButtonText()}</span>
               <ChevronRight className="h-4 w-4 ml-1 md:ml-2" />
