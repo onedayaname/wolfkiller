@@ -69,6 +69,25 @@ export default function IdentityView() {
     }
   }
 
+  const getRoleIcon = (roleId: string) => {
+    switch (roleId) {
+      case 'seer':
+        return <span className="text-6xl">👁️</span>
+      case 'witch':
+        return <span className="text-6xl">🧪</span>
+      case 'guard':
+        return <span className="text-6xl">🛡️</span>
+      case 'hunter':
+        return <span className="text-6xl">🏹</span>
+      case 'villager':
+        return <span className="text-6xl">🧑</span>
+      case 'wolf':
+        return <span className="text-6xl">🐺</span>
+      default:
+        return <span className="text-6xl">🧑</span>
+    }
+  }
+
   const handlePlayerCardClick = (index: number) => {
     if (identityRevealed) {
       hideIdentity()
@@ -187,8 +206,8 @@ export default function IdentityView() {
                       </span>
                     </div>
 
-                    <div className="text-7xl mb-4">
-                      {currentPlayer.role.type === 'wolf' ? '🐺' : '👤'}
+                    <div className="text-7xl mb-4 flex items-center justify-center">
+                      {getRoleIcon(currentPlayer.role.id)}
                     </div>
 
                     <h3 className="text-4xl font-bold text-white mb-4">
