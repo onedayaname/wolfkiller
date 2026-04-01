@@ -83,6 +83,8 @@ export default function IdentityView() {
         return <span className="text-6xl">🧑</span>
       case 'wolf':
         return <span className="text-6xl">🐺</span>
+      case 'knight':
+        return <span className="text-6xl">🦸</span>
       default:
         return <span className="text-6xl">🧑</span>
     }

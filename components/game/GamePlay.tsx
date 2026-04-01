@@ -15,8 +15,6 @@ import {
   RotateCcw,
   Swords,
   Shield,
-  Eye,
-  FlaskConical,
   Target,
   Sparkles,
   CheckCircle,
@@ -24,16 +22,16 @@ import {
 } from 'lucide-react'
 
 const SKILL_ICONS: Record<string, React.ReactNode> = {
-  '刀人': <Skull className="h-4 w-4" />,
-  '查验': <Eye className="h-4 w-4" />,
-  '解药': <Heart className="h-4 w-4" />,
-  '毒药': <FlaskConical className="h-4 w-4" />,
-  '开枪': <Target className="h-4 w-4" />,
-  '守护': <Shield className="h-4 w-4" />,
-  '决斗': <Swords className="h-4 w-4" />,
-  '自爆': <Sparkles className="h-4 w-4" />,
-  '魅惑': <Sparkles className="h-4 w-4" />,
-  '标记': <Target className="h-4 w-4" />,
+  '刀人': <span className="text-lg">🗡️</span>,
+  '查验': <span className="text-lg">👁️</span>,
+  '解药': <span className="text-lg">💊</span>,
+  '毒药': <span className="text-lg">☠️</span>,
+  '开枪': <span className="text-lg">🔫</span>,
+  '守护': <span className="text-lg">🛡️</span>,
+  '决斗': <span className="text-lg">⚔️</span>,
+  '自爆': <span className="text-lg">💥</span>,
+  '魅惑': <span className="text-lg">💕</span>,
+  '标记': <span className="text-lg">🎯</span>,
 }
 
 export default function GamePlay() {
@@ -267,6 +265,27 @@ export default function GamePlay() {
     }
   }
 
+  const getRoleEmoji = (roleId: string) => {
+    switch (roleId) {
+      case 'seer':
+        return '👁️'
+      case 'witch':
+        return '🧪'
+      case 'guard':
+        return '🛡️'
+      case 'hunter':
+        return '🏹'
+      case 'villager':
+        return '🧑'
+      case 'wolf':
+        return '🐺'
+      case 'knight':
+        return '🦸'
+      default:
+        return '🧑'
+    }
+  }
+
   const getPlayerName = (playerId: number | undefined): string => {
     if (!playerId) return ''
     const player = players.find((p) => p.id === playerId)
@@ -344,6 +363,9 @@ export default function GamePlay() {
                     player.role.type
                   )} text-center transition-all shadow-md hover:shadow-lg`}
                 >
+                  <div className={`text-lg mb-1`}>
+                    {getRoleEmoji(player.role.id)}
+                  </div>
                   <div className={isNight ? 'text-white' : 'text-slate-800'}>{player.name}</div>
                   <div className={`text-xs mt-1 ${isNight ? 'text-indigo-300' : 'text-slate-500'}`}>
                     {player.role.name}
@@ -376,6 +398,9 @@ export default function GamePlay() {
                         : 'border-slate-200 bg-slate-50'
                     }`}
                   >
+                    <div className={`text-lg mb-1`}>
+                      {getRoleEmoji(player.role.id)}
+                    </div>
                     <div className={isNight ? 'text-white' : 'text-slate-800'}>{player.name}</div>
                     <div className={`text-xs mt-1 ${isNight ? 'text-indigo-300' : 'text-slate-500'}`}>
                       {player.role.name}
@@ -520,6 +545,9 @@ export default function GamePlay() {
               onClick={(e) => e.stopPropagation()}
             >
               <div className="text-center mb-6">
+                <div className="text-5xl mb-3">
+                  {getRoleEmoji(selectedPlayer.role.id)}
+                </div>
                 <h3 className={`text-2xl font-bold ${isNight ? 'text-white' : 'text-slate-800'}`}>
                   {selectedPlayer.name}
                 </h3>
@@ -532,10 +560,10 @@ export default function GamePlay() {
               {selectedPlayer.status === 'alive' ? (
                 <div className="space-y-3">
                   <Button
-                    className="w-full h-12 bg-red-600 hover:bg-red-700 shadow-lg"
+                    className="w-full h-12 bg-red-600 hover:bg-red-700 shadow-lg text-base"
                     onClick={() => handleKill(selectedPlayer.id)}
                   >
-                    <Skull className="h-4 w-4 mr-2" />
+                    <span className="text-xl mr-2">💀</span>
                     标记死亡
                   </Button>
 
@@ -581,19 +609,19 @@ export default function GamePlay() {
                 <>
                   {selectedPlayer.role.id === 'hunter' && selectedPlayer.hunterShootAvailable && (
                     <Button
-                      className="w-full h-12 mb-3 bg-orange-500 hover:bg-orange-600 shadow-lg"
+                      className="w-full h-12 mb-3 bg-orange-500 hover:bg-orange-600 shadow-lg text-base"
                       onClick={() => handleHunterShoot()}
                     >
-                      <Target className="h-4 w-4 mr-2" />
+                      <span className="text-xl mr-2">🏹</span>
                       <span className="ml-2">开枪</span>
                     </Button>
                   )}
                   <Button
                     variant="secondary"
-                    className="w-full h-12 shadow-md"
+                    className="w-full h-12 shadow-md text-base"
                     onClick={() => handleRevive(selectedPlayer.id)}
                   >
-                    <Heart className="h-4 w-4 mr-2" />
+                    <span className="text-xl mr-2">❤️</span>
                     复活玩家
                   </Button>
                 </>
