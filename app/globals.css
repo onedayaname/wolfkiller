@@ -1,0 +1,103 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+ 
+@layer base {
+  /* 浅色模式 - 用于设置、身份分配、白天 */
+  :root {
+    --background: 210 40% 98%;
+    --foreground: 222 47% 11%;
+    --card: 0 0% 100%;
+    --card-foreground: 222 47% 11%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 222 47% 11%;
+    --primary: 222 47% 11%;
+    --primary-foreground: 210 40% 98%;
+    --secondary: 210 40% 96%;
+    --secondary-foreground: 222 47% 11%;
+    --muted: 210 40% 96%;
+    --muted-foreground: 215 16% 47%;
+    --accent: 210 40% 96%;
+    --accent-foreground: 222 47% 11%;
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 210 40% 98%;
+    --border: 214 32% 91%;
+    --input: 214 32% 91%;
+    --ring: 222 84% 5%;
+    --radius: 0.5rem;
+    --wolf: 0 72% 51%;
+    --wolf-foreground: 0 0% 100%;
+    --good: 142 76% 36%;
+    --good-foreground: 0 0% 100%;
+    --day-bg-start: 210 50% 98%;
+    --day-bg-mid: 200 40% 96%;
+    --day-bg-end: 210 50% 98%;
+    --day-card-bg: 0 0% 100%;
+    --day-card-border: 214 32% 91%;
+    --day-button-bg: 222 47% 11%;
+    --day-button-hover: 222 47% 15%;
+    --day-accent-purple: 250 80% 95%;
+    --day-accent-purple-dark: 250 70% 65%;
+    --speech-wave: 25 95% 53%;
+    --speech-idle: 215 16% 47%;
+    --speech-bg: 210 40% 96%;
+    --speech-text: 222 47% 11%;
+    --ai-highlight: 45 85% 85%;
+    --ai-highlight-border: 45 93% 70%;
+    --winner-wolf: 0 72% 51%;
+    --winner-good: 142 76% 36%;
+  }
+ 
+  /* 深色模式 - 用于夜晚 */
+  .dark {
+    --background: 222 84% 5%;
+    --foreground: 210 40% 98%;
+    --card: 222 84% 5%;
+    --card-foreground: 210 40% 98%;
+    --popover: 222 84% 5%;
+    --popover-foreground: 210 40% 98%;
+    --primary: 210 40% 98%;
+    --primary-foreground: 222 47% 11%;
+    --secondary: 217 33% 18%;
+    --secondary-foreground: 210 40% 98%;
+    --muted: 217 33% 18%;
+    --muted-foreground: 215 20% 65%;
+    --accent: 217 33% 18%;
+    --accent-foreground: 210 40% 98%;
+    --destructive: 0 63% 31%;
+    --destructive-foreground: 210 40% 98%;
+    --border: 217 33% 18%;
+    --input: 217 33% 18%;
+    --ring: 213 27% 84%;
+    --wolf: 0 72% 51%;
+    --wolf-foreground: 0 0% 100%;
+    --good: 142 76% 36%;
+    --good-foreground: 0 0% 100%;
+    --night-bg-start: 222 84% 5%;
+    --night-bg-mid: 250 70% 8%;
+    --night-bg-end: 222 84% 5%;
+    --night-card-bg: 222 84% 8%;
+    --night-card-border: 217 33% 18%;
+    --night-button-bg: 217 33% 18%;
+    --night-button-hover: 217 33% 22%;
+    --night-accent-purple: 250 70% 15%;
+    --night-accent-purple-dark: 250 70% 25%;
+    --speech-wave: 25 95% 53%;
+    --speech-idle: 215 20% 65%;
+    --speech-bg: 222 84% 8%;
+    --speech-text: 210 40% 98%;
+    --ai-highlight: 45 35% 20%;
+    --ai-highlight-border: 45 50% 35%;
+    --winner-wolf: 0 72% 51%;
+    --winner-good: 142 76% 36%;
+  }
+}
+ 
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+}
