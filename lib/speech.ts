@@ -29,6 +29,19 @@ export async function checkMicrophonePermission(): Promise<boolean | null> {
   }
 }
 
+// ─── 主动请求麦克风权限（通过 getUserMedia 触发浏览器授权弹窗）───
+
+export async function requestMicrophonePermission(): Promise<boolean> {
+  try {
+    const stream = await navigator.mediaDevices.getUserMedia({ audio: true })
+    // 立即释放麦克风，实际录音由 SpeechRecognition 处理
+    stream.getTracks().forEach((track) => track.stop())
+    return true
+  } catch {
+    return false
+  }
+}
+
 // ─── useSpeechRecognition Hook ───────────────────────────────
 
 export interface UseSpeechRecognitionOptions {

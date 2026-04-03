@@ -4,13 +4,11 @@ import { useState } from 'react'
 import { motion } from 'framer-motion'
 import { useGameStore } from '@/lib/store'
 import { Review } from '@/lib/types'
-import { buildArchive } from '@/lib/export'
 import type { AIReviewResult } from '@/lib/types'
 import { supabase } from '@/lib/supabase'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import AIReviewSection from './AIReviewSection'
-import ExportButtons from './ExportButtons'
 import { Trophy, Skull, Heart, RotateCcw, Home } from 'lucide-react'
 import Link from 'next/link'
 
@@ -22,14 +20,6 @@ export default function GameEnd() {
 
   const isWolfWin = winner === 'wolf'
   const gameId = useGameStore((state) => state.gameId) ?? 'temp-game-id'
-
-  const archive = buildArchive({
-    gameId,
-    players,
-    winner,
-    speeches,
-    reviews,
-  })
 
   // ─── AI 点评生成 ───────────────────────────────────────────────
   const handleGenerateReviews = async () => {
@@ -268,9 +258,6 @@ export default function GameEnd() {
             </div>
           </CardContent>
         </Card>
-
-        {/* 导出存档 */}
-        <ExportButtons archive={archive} />
 
         <div className="space-y-2 md:space-y-3">
           <Button

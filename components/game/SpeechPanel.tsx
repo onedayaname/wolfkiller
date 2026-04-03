@@ -4,7 +4,7 @@ import { useState, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Mic, MicOff, ChevronDown, ChevronUp, AlertCircle, Pencil, X } from 'lucide-react'
 import { useGameStore } from '@/lib/store'
-import { useSpeechRecognition, isSpeechRecognitionSupported } from '@/lib/speech'
+import { useSpeechRecognition, isSpeechRecognitionSupported, requestMicrophonePermission } from '@/lib/speech'
 import { Speech } from '@/lib/types'
 import { Button } from '@/components/ui/button'
 
@@ -60,6 +60,16 @@ export default function SpeechPanel({
   const handleStartListening = async () => {
     if (!selectedPlayerId) return
     setMicError(null)
+
+    // 主动请求麦克风权限，触发浏览器授权弹窗
+    const granted = await requestMicrophonePermission()
+    if (!granted) {
+      setMicError('microphone_denied')
+      setHasPermission(false)
+      return
+    }
+
+    setHasPermission(true)
     setStatus('listening')
     setTranscript('')
     start()
