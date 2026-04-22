@@ -180,6 +180,8 @@ export const useGameStore = create<GameStore>((set, get) => ({
     set({
       ...initialState,
       ...initialExtendedState,
+      // 保留用户选择的配置
+      config,
       stage: 'viewing',
       gameId: generateGameId(),
       players,
@@ -301,11 +303,14 @@ export const useGameStore = create<GameStore>((set, get) => ({
       (p) => p.status === 'alive' && (p.role.type === 'god' || p.role.type === 'villager')
     ).length
     const bothSidesAlive = aliveWolves > 0 && aliveGoods > 0
-    const { dismissedVictory, ruleSwitchedToKillAll } = get()
+    const { dismissedVictory, config, ruleSwitchedToKillAll } = get()
+
+    // 确定当前有效的游戏规则
+    const effectiveRule = ruleSwitchedToKillAll ? '屠城' : config.gameRule
 
     if (dismissedVictory) {
       // 已点过继续游戏：屠城模式下双方全灭才算赢；屠边模式下保持原检定
-      if (ruleSwitchedToKillAll) {
+      if (effectiveRule === '屠城') {
         // 屠城：只接受双方全灭（all wolves dead / all good dead）
         const isWipeout = !bothSidesAlive
         if (isWipeout) {
