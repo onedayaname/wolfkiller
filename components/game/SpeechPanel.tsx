@@ -25,7 +25,7 @@ export default function SpeechPanel({
 }: SpeechPanelProps) {
   const { players } = useGameStore()
   const [selectedPlayerId, setSelectedPlayerId] = useState<number | null>(null)
-  const [status, setStatus] = useState<'idle' | 'listening' | 'manual'>('idle')
+  const [status, setStatus] = useState<'idle' | 'listening' | 'confirming' | 'manual'>('idle')
   const [transcript, setTranscript] = useState('')
   const [manualText, setManualText] = useState('')
   const [showHistory, setShowHistory] = useState(false)
@@ -53,7 +53,12 @@ export default function SpeechPanel({
     onResult: handleSpeechResult,
     onError: handleSpeechError,
     onEnd: () => {
-      setStatus('idle')
+      // 识别结束，如果有转录内容则进入确认状态
+      if (transcript.trim()) {
+        setStatus('confirming')
+      } else {
+        setStatus('idle')
+      }
     },
   })
 
@@ -77,7 +82,24 @@ export default function SpeechPanel({
 
   const handleStopListening = () => {
     stop()
+    if (transcript.trim()) {
+      // 有转录内容时，进入确认状态
+      setStatus('confirming')
+    } else {
+      // 无内容时直接回到空闲状态
+      setStatus('idle')
+    }
+  }
+
+  const handleConfirmVoice = () => {
+    saveSpeech(transcript.trim())
     setStatus('idle')
+    setTranscript('')
+  }
+
+  const handleCancelVoice = () => {
+    setStatus('idle')
+    setTranscript('')
   }
 
   const handleManualMode = () => {
@@ -98,15 +120,17 @@ export default function SpeechPanel({
     setManualText('')
   }
 
-  const handleEndSpeaking = () => {
+  const handleEndSpeakingOrConfirm = () => {
+    // 如果处于确认状态，先保存转录内容
+    if (status === 'confirming' && transcript.trim()) {
+      saveSpeech(transcript.trim())
+    }
     if (status === 'listening') {
       stop()
     }
-    if (transcript.trim()) {
-      saveSpeech(transcript.trim())
-    }
     setStatus('idle')
     setTranscript('')
+    setManualText('')
     setSelectedPlayerId(null)
     onClose()
   }
@@ -133,6 +157,7 @@ export default function SpeechPanel({
   const selectedPlayer = players.find((p) => p.id === selectedPlayerId)
   const canStart = !!selectedPlayerId && status === 'idle'
   const isSpeaking = status === 'listening'
+  const isConfirming = status === 'confirming'
   const showPanel = isNight ? false : true // 白天显示，夜间隐藏（游戏逻辑控制）
 
   if (!showPanel) return null
@@ -193,8 +218,8 @@ export default function SpeechPanel({
                 </div>
               )}
 
-              {/* 发言者选择 */}
-              {!isSpeaking && !isManual && (
+              {/* 发言者选择（空闲状态时显示） */}
+              {!isSpeaking && !isConfirming && !isManual && (
                 <div className="space-y-2">
                   <p className={`text-xs ${isNight ? 'text-indigo-300' : 'text-slate-500'}`}>
                     当前发言：
@@ -224,11 +249,11 @@ export default function SpeechPanel({
                 </div>
               )}
 
-              {/* 当前发言者标签（识别中） */}
-              {(isSpeaking || isManual) && selectedPlayer && (
+              {/* 当前发言者标签（识别中或确认中） */}
+              {(isSpeaking || isConfirming || isManual) && selectedPlayer && (
                 <div className="flex items-center gap-2">
                   <span className={`text-sm ${isNight ? 'text-white' : 'text-slate-800'}`}>
-                    正在发言：
+                    {isConfirming ? '待确认发言：' : '正在发言：'}
                   </span>
                   <span className="px-2 py-0.5 rounded-full text-sm font-semibold bg-orange-100 text-orange-700 border border-orange-300">
                     {selectedPlayer.name}
@@ -262,6 +287,18 @@ export default function SpeechPanel({
                       {transcript || <span className={isNight ? 'text-indigo-400' : 'text-slate-400'}>正在听...</span>}
                     </p>
                     <div ref={transcriptEndRef} />
+                  </div>
+                ) : isConfirming ? (
+                  <div className="space-y-3">
+                    <div className="flex items-center gap-2">
+                      <Mic className={`h-4 w-4 ${isNight ? 'text-orange-400' : 'text-orange-500'}`} />
+                      <span className={`text-xs ${isNight ? 'text-orange-300' : 'text-orange-600'}`}>
+                        语音识别完成
+                      </span>
+                    </div>
+                    <p className={`text-base leading-relaxed ${isNight ? 'text-white' : 'text-slate-900'}`}>
+                      {transcript}
+                    </p>
                   </div>
                 ) : isManual ? (
                   <div className="space-y-3">
@@ -336,6 +373,25 @@ export default function SpeechPanel({
                   <span className="text-lg mr-2">⏹</span>
                   结束发言
                 </Button>
+              ) : isConfirming ? (
+                <div className="flex gap-2">
+                  <Button
+                    size="sm"
+                    className="flex-1 h-12 bg-orange-500 hover:bg-orange-600 text-white font-bold rounded-xl"
+                    onClick={handleConfirmVoice}
+                  >
+                    <Mic className="h-5 w-5 mr-2" />
+                    确认发言
+                  </Button>
+                  <Button
+                    size="sm"
+                    className="flex-1 h-12 border-2 border-orange-400 text-orange-600 font-bold rounded-xl hover:bg-orange-50"
+                    variant="outline"
+                    onClick={handleCancelVoice}
+                  >
+                    清除重录
+                  </Button>
+                </div>
               ) : (
                 <div className="flex gap-2">
                   {isSupported && hasPermission !== false ? (
@@ -366,14 +422,14 @@ export default function SpeechPanel({
                       取消
                     </Button>
                   )}
-                  {!isSpeaking && !isManual && (
+                  {!isSpeaking && !isConfirming && !isManual && (
                     <Button
                       className={`flex-1 h-12 font-bold rounded-xl ${
                         isNight
                           ? 'bg-indigo-600 hover:bg-indigo-700 text-white'
                           : 'bg-orange-100 hover:bg-orange-200 text-orange-800 border-2 border-orange-300'
                       }`}
-                      onClick={handleEndSpeaking}
+                      onClick={handleEndSpeakingOrConfirm}
                       disabled={!selectedPlayerId}
                     >
                       结束本轮
