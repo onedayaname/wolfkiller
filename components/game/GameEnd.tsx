@@ -1,97 +1,19 @@
 'use client'
 
-import { useState } from 'react'
-import { motion } from 'framer-motion'
 import { useGameStore } from '@/lib/store'
-import { Review } from '@/lib/types'
-import type { AIReviewResult } from '@/lib/types'
-import { supabase } from '@/lib/supabase'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import AIReviewSection from './AIReviewSection'
 import { Trophy, Skull, Heart, RotateCcw, Home } from 'lucide-react'
+import { motion } from 'framer-motion'
 import Link from 'next/link'
 
 export default function GameEnd() {
-  const { players, winner, victoryReason, currentRound, skillUsages, speeches, reviews, setReviews, config, resetGame } = useGameStore()
-
-  const [aiLoading, setAiLoading] = useState(false)
-  const [aiError, setAiError] = useState(false)
+  const { players, winner, victoryReason, currentRound, skillUsages, reviews, resetGame } = useGameStore()
+  const aiReviewLoading = useGameStore((state) => state.aiReviewLoading)
+  const aiReviewError = useGameStore((state) => state.aiReviewError)
 
   const isWolfWin = winner === 'wolf'
-  const gameId = useGameStore((state) => state.gameId) ?? 'temp-game-id'
-
-  // ─── AI 点评生成 ───────────────────────────────────────────────
-  const handleGenerateReviews = async () => {
-    setAiLoading(true)
-    setAiError(false)
-    try {
-      const winningPlayers = players.map((p) => ({
-        number: p.id,
-        name: p.name,
-        role: p.role.name,
-        team: p.role.type === 'wolf' ? 'wolf' as const : 'good' as const,
-      }))
-
-      const response = await fetch('/api/generate-review', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          gameId,
-          ruleType: config.gameRule,
-          winner: winner ?? 'good',
-          players: winningPlayers,
-          speeches: speeches.map((s) => ({
-            day: s.round_day,
-            playerNumber: s.player_number,
-            playerName: s.player_name,
-            content: s.content,
-          })),
-        }),
-      })
-
-      if (!response.ok) {
-        const errBody = await response.text()
-        throw new Error(`API 错误：${errBody}`)
-      }
-
-      const data = await response.json() as { reviews: AIReviewResult[] }
-      const result = data.reviews
-
-      const newReviews: Review[] = result.map((r) => ({
-        player_number: r.player_number,
-        player_name: r.player_name,
-        review_text: r.review,
-        is_winner: true,
-        game_id: gameId,
-      }))
-
-      setReviews(newReviews)
-
-      // 写入 Supabase
-      if (gameId && newReviews.length > 0) {
-        const { error } = await supabase
-          .from('reviews')
-          .insert(
-            newReviews.map((r) => ({
-              game_id: r.game_id,
-              player_number: r.player_number,
-              player_name: r.player_name,
-              review_text: r.review_text,
-              is_winner: r.is_winner,
-            }))
-          )
-        if (error) {
-          console.error('Supabase review insert error:', error)
-        }
-      }
-    } catch (err) {
-      console.error('AI review generation failed:', err)
-      setAiError(true)
-    } finally {
-      setAiLoading(false)
-    }
-  }
 
   const alivePlayers = players.filter((p) => p.status === 'alive')
   const deadPlayers = players.filter((p) => p.status === 'dead')
@@ -195,22 +117,33 @@ export default function GameEnd() {
         {/* AI 点评区块 */}
         <Card className={cardClass()}>
           <CardContent className="pt-4">
-            {winner && (
+            {reviews.length > 0 && winner && (
               <AIReviewSection
                 reviews={reviews}
                 winner={winner}
-                isLoading={aiLoading}
-                isError={aiError}
-                onRetry={handleGenerateReviews}
+                isLoading={false}
+                isError={false}
+                onRetry={() => {}}
               />
             )}
-            {reviews.length === 0 && !aiLoading && !aiError && (
-              <button
-                onClick={handleGenerateReviews}
-                className="w-full py-3 rounded-xl bg-amber-500 hover:bg-amber-600 text-white font-bold transition-all"
-              >
-                ✨ 一键生成 AI 点评
-              </button>
+            {reviews.length === 0 && aiReviewLoading && (
+              <div className="flex flex-col items-center justify-center py-8 gap-4">
+                <div className="relative">
+                  <div className="w-16 h-16 rounded-full border-4 border-orange-200 border-t-orange-500 animate-spin"></div>
+                </div>
+                <p className={`${textMuted} text-sm animate-pulse`}>让我看看你们的表现...</p>
+              </div>
+            )}
+            {aiReviewError && !aiReviewLoading && (
+              <div className={`text-center py-8 ${textMuted}`}>
+                <p className="mb-3">⚠️ AI 点评生成失败</p>
+                <p className="text-xs opacity-70 mb-4">{aiReviewError}</p>
+              </div>
+            )}
+            {reviews.length === 0 && !aiReviewLoading && !aiReviewError && (
+              <div className={`text-center py-8 ${textMuted}`}>
+                <p>AI 点评暂未生成</p>
+              </div>
             )}
           </CardContent>
         </Card>

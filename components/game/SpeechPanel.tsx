@@ -33,7 +33,7 @@ export default function SpeechPanel({
   const [micError, setMicError] = useState<string | null>(null)
   const transcriptEndRef = useRef<HTMLDivElement>(null)
 
-  const alivePlayers = players.filter((p) => p.status === 'alive')
+  const allPlayers = players.filter((p) => p.status === 'alive' || p.deathInfo)
   const isSupported = isSpeechRecognitionSupported()
 
   const handleSpeechResult = (text: string) => {
@@ -225,8 +225,9 @@ export default function SpeechPanel({
                     当前发言：
                   </p>
                   <div className="flex flex-wrap gap-2">
-                    {alivePlayers.map((player) => {
+                    {allPlayers.map((player) => {
                       const isSelected = selectedPlayerId === player.id
+                      const isDead = player.status === 'dead'
                       return (
                         <button
                           key={player.id}
@@ -239,9 +240,11 @@ export default function SpeechPanel({
                                 ? 'border-indigo-700 bg-indigo-900/30 text-indigo-300 hover:bg-indigo-900/50'
                                 : 'border-slate-200 bg-slate-50 text-slate-600 hover:bg-slate-100'
                             }
+                            ${isDead ? 'opacity-60 line-through' : ''}
                           `}
                         >
                           {player.name}
+                          {isDead && '💀'}
                         </button>
                       )
                     })}

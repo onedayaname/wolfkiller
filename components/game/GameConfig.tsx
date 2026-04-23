@@ -141,16 +141,6 @@ export default function GameConfig() {
           <CardContent>
             <div className="flex flex-col sm:flex-row gap-2 md:gap-4 mb-3">
               <Button
-                onClick={() => setGameRule('屠边')}
-                className={`flex-1 h-10 md:h-12 text-sm md:text-base font-medium rounded-xl transition-all ${
-                  config.gameRule === '屠边'
-                    ? 'bg-gradient-to-r from-indigo-500 to-purple-500 text-white shadow-lg shadow-indigo-500/30 border-2 border-indigo-400'
-                    : 'bg-white text-slate-600 border-2 border-slate-200 hover:border-indigo-300 hover:bg-indigo-50'
-                }`}
-              >
-                屠边
-              </Button>
-              <Button
                 onClick={() => setGameRule('屠城')}
                 className={`flex-1 h-10 md:h-12 text-sm md:text-base font-medium rounded-xl transition-all ${
                   config.gameRule === '屠城'
@@ -159,6 +149,16 @@ export default function GameConfig() {
                 }`}
               >
                 屠城
+              </Button>
+              <Button
+                onClick={() => setGameRule('屠边')}
+                className={`flex-1 h-10 md:h-12 text-sm md:text-base font-medium rounded-xl transition-all ${
+                  config.gameRule === '屠边'
+                    ? 'bg-gradient-to-r from-indigo-500 to-purple-500 text-white shadow-lg shadow-indigo-500/30 border-2 border-indigo-400'
+                    : 'bg-white text-slate-600 border-2 border-slate-200 hover:border-indigo-300 hover:bg-indigo-50'
+                }`}
+              >
+                屠边
               </Button>
             </div>
             <p className="text-xs text-slate-500">

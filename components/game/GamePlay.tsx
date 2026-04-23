@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useGameStore } from '@/lib/store'
 import { Player, SKILL_CONFIGS, SkillConfig } from '@/lib/types'
@@ -110,6 +110,13 @@ export default function GamePlay() {
 
   const alivePlayers = players.filter((p) => p.status === 'alive')
   const deadPlayers = players.filter((p) => p.status === 'dead')
+
+  // 胜利弹窗弹出时自动触发 AI 点评生成
+  useEffect(() => {
+    if (showVictoryDialog && winner) {
+      useGameStore.getState().generateAIReview()
+    }
+  }, [showVictoryDialog, winner])
 
   const getVictoryReasonText = () => {
     if (!victoryReason) return ''
@@ -759,12 +766,15 @@ export default function GamePlay() {
                   {validTargets.map((target) => (
                     <Button
                       key={target.id}
-                      variant="outline"
-                      className={`h-14 flex flex-col shadow-md ${isNight ? 'text-slate-300' : 'text-slate-700'}`}
+                      className={`h-14 flex flex-col shadow-md border-2 ${
+                        isNight
+                          ? 'bg-indigo-800 border-indigo-600 text-white hover:bg-indigo-700'
+                          : 'bg-white border-orange-300 text-slate-800 hover:bg-orange-50'
+                      }`}
                       onClick={() => handleTargetSelect(target.id)}
                     >
                       <span className="font-medium">{target.name}</span>
-                      <span className={`text-xs ${isNight ? 'text-slate-400' : 'text-slate-500'}`}>{target.role.name}</span>
+                      <span className={`text-xs ${isNight ? 'text-indigo-300' : 'text-slate-500'}`}>{target.role.name}{target.role.emoji}</span>
                     </Button>
                   ))}
                 </div>
@@ -866,16 +876,39 @@ export default function GamePlay() {
                 >
                   确认结束游戏
                 </Button>
-                <Button
-                  variant="ghost"
-                  className={`w-full ${isNight ? 'text-slate-300' : 'text-slate-600'}`}
-                  onClick={() => {
-                    useGameStore.setState({ showVictoryDialog: false })
-                    setShowRuleSwitchDialog(true)
-                  }}
-                >
-                  继续游戏
-                </Button>
+                <div className="flex gap-3">
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    className={`flex-1 h-12 font-bold border-2 ${
+                      isNight
+                        ? 'border-indigo-400 text-indigo-200 hover:bg-indigo-900/50 hover:text-indigo-100'
+                        : 'border-orange-300 text-orange-700 hover:bg-orange-100 hover:text-orange-800'
+                    }`}
+                    onClick={() => {
+                      useGameStore.getState().cancelAIReview()
+                      useGameStore.getState().keepCurrentRule()
+                      useGameStore.setState({ showVictoryDialog: false })
+                    }}
+                  >
+                    屠边规则继续游戏
+                  </Button>
+                  <Button
+                    size="sm"
+                    className={`flex-1 h-12 font-bold ${
+                      isNight
+                        ? 'bg-indigo-600 hover:bg-indigo-700 text-white'
+                        : 'bg-orange-500 hover:bg-orange-600 text-white'
+                    }`}
+                    onClick={() => {
+                      useGameStore.getState().cancelAIReview()
+                      useGameStore.getState().switchToKillAll()
+                      useGameStore.setState({ showVictoryDialog: false })
+                    }}
+                  >
+                    屠城规则继续游戏
+                  </Button>
+                </div>
               </div>
             </motion.div>
           </motion.div>

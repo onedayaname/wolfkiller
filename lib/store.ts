@@ -42,6 +42,9 @@ interface GameStore extends GameState {
   ruleSwitchedToKillAll: boolean // 已切换屠城，后续只有双方全灭才算赢
   speeches: Speech[]
   reviews: Review[]
+  aiReviewLoading: boolean
+  aiReviewError: string | null
+  aiReviewAbortController: AbortController | null
   setPlayerCount: (count: number) => void
   setRoleConfig: (config: Record<string, number>) => void
   setGameRule: (rule: GameConfig['gameRule']) => void
@@ -69,6 +72,8 @@ interface GameStore extends GameState {
   canGoBack: () => boolean
   switchToKillAll: () => void    // 改为屠城
   keepCurrentRule: () => void     // 继续屠边
+  cancelAIReview: () => void
+  generateAIReview: () => Promise<void>
 }
 
 const initialState: GameState = {
@@ -76,7 +81,7 @@ const initialState: GameState = {
   config: {
     playerCount: 9,
     roleConfig: getRecommendedConfig(9),
-    gameRule: '屠边',
+    gameRule: '屠城',
   },
   players: [],
   currentRound: 1,
@@ -105,6 +110,9 @@ const initialExtendedState = {
   blockedGuardPlayerId: null as number | null,
   hunterSkillPrompt: null as HunterSkillPrompt | null,
   ruleSwitchedToKillAll: false,
+  aiReviewLoading: false,
+  aiReviewError: null,
+  aiReviewAbortController: null,
   ...speechReviewState,
 }
 
@@ -323,15 +331,8 @@ export const useGameStore = create<GameStore>((set, get) => ({
         set({ winner: result.winner, victoryReason: result.reason, showVictoryDialog: true })
       }
     } else {
-      // 首次触发
-      if (bothSidesAlive) {
-        // 双方都有人：弹窗，可选继续
-        set({ winner: result.winner, victoryReason: result.reason, showVictoryDialog: true })
-      } else {
-        // 某阵营全灭：直接结束
-        set({ winner: result.winner, victoryReason: result.reason })
-        get().confirmVictory()
-      }
+      // 首次触发：始终弹窗让用户选择是否结束
+      set({ winner: result.winner, victoryReason: result.reason, showVictoryDialog: true })
     }
   },
 
@@ -530,6 +531,106 @@ export const useGameStore = create<GameStore>((set, get) => ({
     })
   },
 
+  cancelAIReview: () => {
+    const { aiReviewAbortController } = get()
+    if (aiReviewAbortController) {
+      aiReviewAbortController.abort()
+    }
+    set({ aiReviewLoading: false, aiReviewError: null, aiReviewAbortController: null, reviews: [] })
+  },
+
+  generateAIReview: async () => {
+    const { gameId, config, winner, players, speeches } = get()
+
+    // 如果正在生成或没有胜利方，不重复触发
+    if (get().aiReviewLoading || !winner) return
+
+    // 取消之前的请求
+    get().cancelAIReview()
+
+    const controller = new AbortController()
+    set({ aiReviewLoading: true, aiReviewError: null, aiReviewAbortController: controller, reviews: [] })
+
+    try {
+      const winningPlayers = players.map((p) => ({
+        number: p.id,
+        name: p.name,
+        role: p.role.name,
+        team: p.role.type === 'wolf' ? 'wolf' as const : 'good' as const,
+      }))
+
+      const response = await fetch('/api/generate-review', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          gameId: gameId || 'temp-game-id',
+          ruleType: config.gameRule,
+          winner,
+          players: winningPlayers,
+          speeches: speeches.map((s) => ({
+            day: s.round_day,
+            playerNumber: s.player_number,
+            playerName: s.player_name,
+            content: s.content,
+          })),
+        }),
+        signal: controller.signal,
+      })
+
+      if (!response.ok) {
+        const errBody = await response.text()
+        throw new Error(`API 错误：${errBody}`)
+      }
+
+      const data = await response.json() as { reviews: Array<{ player_number: number; player_name: string; review: string }> }
+      const result = data.reviews
+
+      if (get().aiReviewAbortController !== controller) {
+        // 请求已被取消，不处理结果
+        return
+      }
+
+      const newReviews: Review[] = result.map((r) => ({
+        player_number: r.player_number,
+        player_name: r.player_name,
+        review_text: r.review,
+        is_winner: true,
+        game_id: gameId || 'temp-game-id',
+      }))
+
+      set({ reviews: newReviews, aiReviewLoading: false, aiReviewError: null, aiReviewAbortController: null })
+
+      // 写入 Supabase（不阻塞 UI）
+      if (gameId && newReviews.length > 0) {
+        const { supabase } = await import('@/lib/supabase')
+        const { error } = await supabase
+          .from('reviews')
+          .insert(
+            newReviews.map((r) => ({
+              game_id: r.game_id,
+              player_number: r.player_number,
+              player_name: r.player_name,
+              review_text: r.review_text,
+              is_winner: r.is_winner,
+            }))
+          )
+        if (error) {
+          console.error('Supabase review insert error:', error)
+        }
+      }
+    } catch (err) {
+      if (err instanceof Error && err.name === 'AbortError') {
+        // 用户取消，不处理
+        return
+      }
+      console.error('AI review generation failed:', err)
+      const errorMessage = err instanceof Error ? err.message : 'AI 生成失败'
+      if (get().aiReviewAbortController === controller) {
+        set({ aiReviewLoading: false, aiReviewError: errorMessage, aiReviewAbortController: null })
+      }
+    }
+  },
+
   dismissHunterPrompt: () => {
     set({ hunterSkillPrompt: null })
   },
@@ -636,7 +737,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
       config: {
         playerCount: 9,
         roleConfig: getRecommendedConfig(9),
-        gameRule: '屠边',
+        gameRule: '屠城',
       },
     })
   },

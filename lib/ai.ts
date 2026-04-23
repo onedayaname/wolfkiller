@@ -121,7 +121,7 @@ export async function generateReviews(params: {
       Authorization: `Bearer ${apiKey}`,
     },
     body: JSON.stringify({
-      model: 'MiniMax-M2.7',
+      model: 'MiniMax-M2.5',
       stream: false,
       max_completion_tokens: 2048,
       temperature: 1.0,
