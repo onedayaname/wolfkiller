@@ -241,8 +241,8 @@ export default function SpeechPanel({
                 className={`
                   rounded-xl p-4 min-h-[80px]
                   ${isNight
-                    ? 'bg-[hsl(var(--night-card-bg))] border border-[hsl(var(--night-card-border))]'
-                    : 'bg-[hsl(var(--speech-bg))] border border-[hsl(var(--day-card-border))]'
+                    ? 'bg-indigo-950/50 border border-indigo-400/30'
+                    : 'bg-orange-50 border border-orange-200'
                   }
                 `}
               >
@@ -258,7 +258,7 @@ export default function SpeechPanel({
                       </motion.div>
                       <span className="text-xs text-orange-500">识别中...</span>
                     </div>
-                    <p className={`text-base leading-relaxed ${isNight ? 'text-white' : 'text-slate-800'}`}>
+                    <p className={`text-base leading-relaxed ${isNight ? 'text-white' : 'text-slate-900'}`}>
                       {transcript || <span className={isNight ? 'text-indigo-400' : 'text-slate-400'}>正在听...</span>}
                     </p>
                     <div ref={transcriptEndRef} />
@@ -368,11 +368,10 @@ export default function SpeechPanel({
                   )}
                   {!isSpeaking && !isManual && (
                     <Button
-                      variant="outline"
-                      className={`flex-1 h-12 font-bold rounded-xl border-2 ${
+                      className={`flex-1 h-12 font-bold rounded-xl ${
                         isNight
-                          ? 'border-indigo-400 text-indigo-300 hover:bg-indigo-900/30'
-                          : 'border-orange-300 text-orange-500 hover:bg-orange-50'
+                          ? 'bg-indigo-600 hover:bg-indigo-700 text-white'
+                          : 'bg-orange-100 hover:bg-orange-200 text-orange-800 border-2 border-orange-300'
                       }`}
                       onClick={handleEndSpeaking}
                       disabled={!selectedPlayerId}
