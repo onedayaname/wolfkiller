@@ -39,12 +39,21 @@ function buildUserPrompt(params: {
   winner: string
   winningPlayers: Array<{ number: number; name: string; role: string }>
   speeches: Array<{ day: number; playerName: string; content: string }>
+  skillUsages?: Array<{ round: number; phase: string; playerId: number; roleName: string; skillName: string; targetId?: number }>
 }): string {
-  const { winner, winningPlayers, speeches, ruleType } = params
+  const { winner, winningPlayers, speeches, skillUsages, ruleType } = params
 
   const speechesText = speeches
     .map((s) => `Day ${s.day}，[${s.playerName}] 说：${s.content}`)
     .join('\n')
+
+  const skillsText = skillUsages && skillUsages.length > 0
+    ? skillUsages.map((s) => {
+        const phaseStr = s.phase === 'night' ? '黑夜' : '白天'
+        const targetStr = s.targetId ? `对 ${s.targetId}号玩家 ` : ''
+        return `第 ${s.round} 轮 ${phaseStr}：[${s.playerId}号] (${s.roleName}) ${targetStr}使用了“${s.skillName}”`
+      }).join('\n')
+    : '（本局暂无技能使用记录）'
 
   const winnerLabel = winner === 'wolf' ? '狼人阵营' : '好人阵营'
 
@@ -54,6 +63,9 @@ function buildUserPrompt(params: {
 - 游戏ID：${params.gameId}
 - 规则：${ruleType}
 - 胜方：${winnerLabel}
+
+技能使用记录：
+${skillsText}
 
 发言记录：
 ${speechesText || '（本局暂无发言记录）'}
@@ -84,6 +96,7 @@ export async function generateReviews(params: {
   winner: string
   players: Array<{ number: number; name: string; role: string; team: 'wolf' | 'good' }>
   speeches: Array<{ day: number; playerNumber: number; playerName: string; content: string }>
+  skillUsages?: Array<{ round: number; phase: string; playerId: number; roleName: string; skillName: string; targetId?: number }>
 }): Promise<AIReviewResult[]> {
   const apiKey = process.env.MINIMAX_API_KEY
 
@@ -107,6 +120,7 @@ export async function generateReviews(params: {
       playerName: s.playerName,
       content: s.content,
     })),
+    skillUsages: params.skillUsages,
   })
 
   const messages: MiniMaxMessage[] = [
