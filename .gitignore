@@ -6,3 +6,9 @@
 node_modules/
 .next/
 PRDs/
+
+# AI IDE cache and config
+.claude
+.claude/
+.cursor/
+.gemini/
