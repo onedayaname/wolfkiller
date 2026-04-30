@@ -540,7 +540,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
   },
 
   generateAIReview: async () => {
-    const { gameId, config, winner, players, speeches } = get()
+    const { gameId, config, winner, players, speeches, skillUsages } = get()
 
     // 如果正在生成或没有胜利方，不重复触发
     if (get().aiReviewLoading || !winner) return
@@ -572,6 +572,14 @@ export const useGameStore = create<GameStore>((set, get) => ({
             playerNumber: s.player_number,
             playerName: s.player_name,
             content: s.content,
+          })),
+          skillUsages: skillUsages.map((usage) => ({
+            round: usage.round,
+            phase: usage.phase,
+            playerId: usage.playerId,
+            roleName: usage.roleName,
+            skillName: usage.skillName,
+            targetId: usage.targetId,
           })),
         }),
         signal: controller.signal,

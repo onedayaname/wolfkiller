@@ -9,7 +9,7 @@ import { motion } from 'framer-motion'
 import Link from 'next/link'
 
 export default function GameEnd() {
-  const { players, winner, victoryReason, currentRound, skillUsages, reviews, resetGame } = useGameStore()
+  const { players, winner, victoryReason, currentRound, skillUsages, reviews, resetGame, generateAIReview } = useGameStore()
   const aiReviewLoading = useGameStore((state) => state.aiReviewLoading)
   const aiReviewError = useGameStore((state) => state.aiReviewError)
 
@@ -123,7 +123,7 @@ export default function GameEnd() {
                 winner={winner}
                 isLoading={false}
                 isError={false}
-                onRetry={() => {}}
+                onRetry={generateAIReview}
               />
             )}
             {reviews.length === 0 && aiReviewLoading && (
